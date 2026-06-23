@@ -1,423 +1,1190 @@
-/* ============================================================================
- *  MY JOURNEY — Marlon B. Siqueira
- *  Content architecture. Bilingual (EN / PT). Data-driven: edit a chapter here
- *  and the whole experience updates. No other file needs to change.
+/* =============================================================================
+ *  journey-data.js  —  window.JOURNEY_DATA
+ *  All slides for "My Journey" site.
  *
- *  Each slide:
- *    id        unique id
- *    layout    "hero" | "story" | "closing" | "thanks"
- *    chapter   small number label ("" to hide)
- *    flag      flagcdn code shown in the header (e.g. "br", "gb-eng")
- *    focus     where the globe goes for this chapter:
- *                { overview:true }                              -> distant rotating Earth
- *                { coordinates:[lng,lat], dist:NNN, match:"X" } -> centre + soft-fill a country
- *                marker:[lng,lat] + markerLabel{en,pt}          -> a star + label (origin point)
- *    side      "left" | "right" — which side the media panel sits on (auto-alternates if unset)
- *    media     { type, items, stat } — see renderers in journey.js
- *    experiences { en:[...], pt:[...] } — chip list under the body
- *    en / pt   localized text: kicker, title, name?, body?, alt?, cta?
+ *  Photo placeholders use paths like:
+ *    assets/img/journey/[city]/photo-N.jpg
+ *  Video placeholders:
+ *    assets/img/journey/[city]/video-N.mp4
+ *  Flag images:
+ *    public/flags/[code].png   (e.g. public/flags/BRA.png)
  *
- *  MEDIA PATHS (drop files into an "images/" folder next to index.html):
- *    images/mi1.jpg · logo1..6.jpg · edu1..4.jpg
- *    images/BR_video1..4.mp4 · images/US_*.jpg + US_video1.mp4
- *    images/england1..2.jpg, italy1..2.jpg, … (one set per country)
- *    images/sports.jpg · achv1..2.jpg · contact.jpg
- * ========================================================================== */
+ *  Upload your own images to those exact paths on GitHub and they will appear.
+ * ============================================================================= */
 
 window.JOURNEY_DATA = {
-  brand: {
-    name: "MARLON B. SIQUEIRA",
-    loading: { en: "Preparing your journey", pt: "Preparando sua jornada" },
-  },
 
   settings: {
-    accent: "#5cc8ff",
-    highlight: "#7df2a8",   // soft green country fill (alt blue: "#8fd0ff")
-    autoRotate: true,
-    rotateSpeed: 0.012,
+    accent:      "#5cc8ff",
+    highlight:   "#7df2a8",
+    autoRotate:  true,
+    rotateSpeed: 0.6,
+  },
+
+  brand: {
+    name: "Marlon B. Siqueira",
+    tagline: { en: "My Personal Journey", pt: "A Minha Jornada" },
   },
 
   ui: {
-    next:    { en: "Next",     pt: "Próximo" },
-    prev:    { en: "Previous", pt: "Anterior" },
-    chapter: { en: "Chapter",  pt: "Capítulo" },
-    of:      { en: "of",       pt: "de" },
+    prev:    { en: "Prev",    pt: "Anterior" },
+    next:    { en: "Next",    pt: "Próximo"  },
+    of:      { en: "of",      pt: "de"       },
+    loading: { en: "Loading journey…", pt: "A carregar…" },
   },
 
   slides: [
-    /* ---- 1 · OPENING — planet only, no text ---- */
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  CHAPTER 04 — BRAZIL · ADRENALINE & NATURE
+     * ────────────────────────────────────────────────────────────────────────── */
     {
-      id: "intro", layout: "splash", chapter: "",
+      layout: "chapter",
+      flag:   "BRA",
+      chapter: { en: "Chapter 04", pt: "Capítulo 04" },
       focus: { overview: true },
       en: {
-        kicker: "An Interactive Journey",
-        title: "Welcome to My Journey",
-        name: "Marlon B. Siqueira",
-        body: "It began in Belo Horizonte, Minas Gerais — and grew into a story that spans continents. A journey of persistence, curiosity and continuous growth, told one destination at a time.",
-        cta: "Begin the journey",
+        title:    "Brazil",
+        subtitle: "Adrenaline & Nature",
+        body:     "From the mountains of Minas Gerais to the beaches of Florianópolis — Brazil in full colour.",
       },
       pt: {
-        kicker: "Uma Jornada Interativa",
-        title: "Bem-vindo à Minha Jornada",
-        name: "Marlon B. Siqueira",
-        body: "Tudo começou em Belo Horizonte, Minas Gerais — e cresceu até se tornar uma história que atravessa continentes. Uma jornada de persistência, curiosidade e crescimento contínuo, contada um destino de cada vez.",
-        cta: "Começar a jornada",
+        title:    "Brasil",
+        subtitle: "Adrenalina & Natureza",
+        body:     "Das montanhas de Minas Gerais às praias de Florianópolis — o Brasil em plena cor.",
       },
     },
 
-    /* ---- 2 · WHO I AM ---- */
+    /* ── Belo Horizonte ── */
     {
-      id: "about", layout: "story", chapter: "01", flag: "br", side: "right",
-      focus: { coordinates: [-43.94, -19.92], dist: 320, match: "Brazil",
-               marker: [-43.94, -19.92], markerLabel: { en: "Belo Horizonte, Minas Gerais", pt: "Belo Horizonte, Minas Gerais" } },
-      media: { type: "image", src: "images/mi1.jpg", label: "images/mi1.jpg" },
+      layout: "media-text",
+      flag:   "BRA",
+      chapter: { en: "Chapter 04 · Brazil", pt: "Capítulo 04 · Brasil" },
+      focus: {
+        coordinates: [-43.9378, -19.9208],
+        camDistance: 2.0,
+        marker:      [-43.9378, -19.9208],
+        markerLabel: { en: "Belo Horizonte", pt: "Belo Horizonte" },
+        match:       "Brazil",
+      },
       en: {
-        kicker: "Who I Am · Belo Horizonte, Brazil",
-        title: "Where it all began",
-        body: "I was born and raised in Belo Horizonte, surrounded by family, friends, school and sport. From an early age I learned the value of hard work, perseverance and continuous self-development — principles that have guided every chapter since.",
+        title:    "Belo Horizonte",
+        subtitle: "Heart of Minas Gerais",
+        body:     "A city of hills, culture, and world-class gastronomy. The gateway to Brazil's mining heritage.",
       },
       pt: {
-        kicker: "Quem Sou · Belo Horizonte, Brasil",
-        title: "Onde tudo começou",
-        body: "Nasci e cresci em Belo Horizonte, cercado pela família, amigos, escola e esporte. Desde cedo aprendi o valor do trabalho árduo, da perseverança e do autodesenvolvimento contínuo — princípios que guiaram cada capítulo desde então.",
+        title:    "Belo Horizonte",
+        subtitle: "Coração de Minas Gerais",
+        body:     "Uma cidade de colinas, cultura e gastronomia de excelência. Porta de entrada para o património mineiro.",
       },
-    },
-
-    /* ---- 3 · PROFESSIONAL JOURNEY ---- */
-    {
-      id: "career", layout: "story", chapter: "02", side: "right",
-      focus: { overview: true },
       media: {
-        type: "logos",
+        type: "gallery",
+        cols: 2,
         items: [
-          { src: "images/logo1.jpg", en: { n: "Sandvik", r: "Swedish multinational — first international corporate environment." }, pt: { n: "Sandvik", r: "Multinacional sueca — primeiro ambiente corporativo internacional." } },
-          { src: "images/logo2.jpg", en: { n: "Vale", r: "Águas Claras Mine — after a five-stage selection." }, pt: { n: "Vale", r: "Mina de Águas Claras — após seleção de cinco etapas." } },
-          { src: "images/logo3.jpg", en: { n: "ALE Combustíveis", r: "Cost Analyst — fuel pricing & logistics." }, pt: { n: "ALE Combustíveis", r: "Analista de Custos — preços e logística de combustíveis." } },
-          { src: "images/logo4.jpg", en: { n: "Meridian Global", r: "Ireland — VAT & international tax." }, pt: { n: "Meridian Global", r: "Irlanda — IVA e tributação internacional." } },
-          { src: "images/logo5.svg", en: { n: "Fundação Renova", r: "Organizational structuring & recovery." }, pt: { n: "Fundação Renova", r: "Estruturação organizacional e recuperação." } },
-          { src: "images/logo6.jpg", en: { n: "Stellantis", r: "~7 years — SAP S/4HANA, RPA, AI & automation." }, pt: { n: "Stellantis", r: "~7 anos — SAP S/4HANA, RPA, IA e automação." } },
+          { src: "assets/img/journey/belo-horizonte/photo-1.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/belo-horizonte/photo-2.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/belo-horizonte/photo-3.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/belo-horizonte/photo-4.jpg", en: { cap: "" }, pt: { cap: "" } },
         ],
-        photos: [
-          { src: "images/career1.jpg" },
-          { src: "images/career2.jpg" },
-          { src: "images/career3.jpg" },
-          { src: "images/career4.jpg" },
-        ],
-      },
-      en: {
-        kicker: "Career · From Brazil to the World",
-        title: "A global professional impact",
-        body: "From humble beginnings in retail and sales to multinational organizations and global automation — with recruitment processes at PwC, Deloitte and McKinsey & Company along the way.",
-      },
-      pt: {
-        kicker: "Carreira · Do Brasil para o Mundo",
-        title: "Um impacto profissional global",
-        body: "De começos humildes no varejo e vendas até organizações multinacionais e automação global — com processos seletivos na PwC, Deloitte e McKinsey & Company pelo caminho.",
       },
     },
 
-    /* ---- 4 · EDUCATION ---- */
+    /* ── Rio de Janeiro ── */
     {
-      id: "education", layout: "story", chapter: "03", side: "right",
-      focus: { overview: true },
+      layout: "media-text",
+      flag:   "BRA",
+      chapter: { en: "Chapter 04 · Brazil", pt: "Capítulo 04 · Brasil" },
+      focus: {
+        coordinates: [-43.1729, -22.9068],
+        camDistance: 2.0,
+        marker:      [-43.1729, -22.9068],
+        markerLabel: { en: "Rio de Janeiro", pt: "Rio de Janeiro" },
+        match:       "Brazil",
+      },
+      en: {
+        title:    "Rio de Janeiro",
+        subtitle: "Cidade Maravilhosa",
+        body:     "Cristo Redentor, Pão de Açúcar, Copacabana, Ipanema — and the sky from a paraglider above the city.",
+      },
+      pt: {
+        title:    "Rio de Janeiro",
+        subtitle: "Cidade Maravilhosa",
+        body:     "Cristo Redentor, Pão de Açúcar, Copacabana, Ipanema — e o céu visto de asa delta sobre a cidade.",
+      },
       media: {
-        type: "gallery", cols: 2,
+        type: "gallery",
+        cols: 2,
         items: [
-          { src: "images/edu1.jpg", en: { cap: "First School" }, pt: { cap: "Primeira escola" } },
-          { src: "images/edu2.jpg", en: { cap: "Primary School" }, pt: { cap: "Escola primária" } },
-          { src: "images/edu3.jpg", en: { cap: "Bachelor's — Business Administration" }, pt: { cap: "Bacharelado — Administração" } },
-          { src: "images/edu4.jpg", en: { cap: "Postgraduate — Finance & Taxation · London" }, pt: { cap: "Pós-Graduação — Finanças e Tributação · Londres" } },
+          { src: "assets/img/journey/rio/cristo-redentor.jpg",  en: { cap: "Cristo Redentor" },  pt: { cap: "Cristo Redentor" } },
+          { src: "assets/img/journey/rio/pao-de-acucar.jpg",    en: { cap: "Pão de Açúcar" },    pt: { cap: "Pão de Açúcar" } },
+          { src: "assets/img/journey/rio/copacabana.jpg",       en: { cap: "Copacabana" },        pt: { cap: "Copacabana" } },
+          { src: "assets/img/journey/rio/ipanema.jpg",          en: { cap: "Ipanema" },           pt: { cap: "Ipanema" } },
+          { src: "assets/img/journey/rio/helicopter-video.mp4", en: { cap: "Helicopter tour" },   pt: { cap: "Tour de helicóptero" }, video: true },
+          { src: "assets/img/journey/rio/hang-gliding-video.mp4", en: { cap: "Hang gliding" },   pt: { cap: "Asa delta" },           video: true },
         ],
-      },
-      en: {
-        kicker: "Education · Brazil & Portugal",
-        title: "A commitment to lifelong learning",
-        body: "A Bachelor's Degree in Business Administration, later expanded with a Postgraduate Degree in Finance and Taxation in Portugal — a continuous desire to broaden my understanding of business, finance and global markets.",
-      },
-      pt: {
-        kicker: "Formação · Brasil e Portugal",
-        title: "Um compromisso com o aprendizado contínuo",
-        body: "Bacharelado em Administração de Empresas, ampliado com uma Pós-Graduação em Finanças e Tributação em Portugal — o desejo contínuo de ampliar meu conhecimento em negócios, finanças e mercados globais.",
       },
     },
 
-    /* ---- 5 · BRAZIL ADVENTURES ---- */
+    /* ── Florianópolis ── */
     {
-      id: "brazil", layout: "story", chapter: "04", flag: "br", side: "left",
-      focus: { coordinates: [-47, -14], dist: 285, match: "Brazil" },
+      layout: "media-text",
+      flag:   "BRA",
+      chapter: { en: "Chapter 04 · Brazil", pt: "Capítulo 04 · Brasil" },
+      focus: {
+        coordinates: [-48.5480, -27.5954],
+        camDistance: 2.0,
+        marker:      [-48.5480, -27.5954],
+        markerLabel: { en: "Florianópolis", pt: "Florianópolis" },
+        match:       "Brazil",
+      },
+      en: {
+        title:    "Florianópolis",
+        subtitle: "Island of Magic",
+        body:     "Stunning beaches, lagoons, and the crystal-clear waters of Santa Catarina — including an underwater dive.",
+      },
+      pt: {
+        title:    "Florianópolis",
+        subtitle: "Ilha da Magia",
+        body:     "Praias deslumbrantes, lagoas e as águas cristalinas de Santa Catarina — incluindo um mergulho.",
+      },
       media: {
-        type: "gallery", cols: 2,
+        type: "gallery",
+        cols: 2,
         items: [
-          { src: "images/BR_video1.mp4", video: true, en: { cap: "Helicopter · Rio" }, pt: { cap: "Helicóptero · Rio" } },
-          { src: "images/BR_video2.mp4", video: true, en: { cap: "Skydiving" }, pt: { cap: "Paraquedismo" } },
-          { src: "images/BR_video3.mp4", video: true, en: { cap: "Hang gliding · Rio" }, pt: { cap: "Asa-delta · Rio" } },
-          { src: "images/BR_video4.mp4", video: true, en: { cap: "Aerobatic flight" }, pt: { cap: "Voo acrobático" } },
-          { src: "images/BR_video5.mp4", video: true, en: { cap: "Scuba diving" }, pt: { cap: "Mergulho" } },
-          { src: "images/BR_kart.jpg", en: { cap: "Kart racing" }, pt: { cap: "Kart" } },
+          { src: "assets/img/journey/florianopolis/photo-1.jpg",     en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/florianopolis/photo-2.jpg",     en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/florianopolis/diving-video.mp4",en: { cap: "Diving" }, pt: { cap: "Mergulho" }, video: true },
         ],
       },
-      experiences: {
-        en: ["Skydiving · Serra do Curral", "Hang gliding · Rio", "Helicopter flight · Rio", "Aerobatic flight", "Scuba diving · Florianópolis", "Kart racing", "Jiu-Jitsu", "Running events"],
-        pt: ["Paraquedismo · Serra do Curral", "Asa-delta · Rio", "Voo de helicóptero · Rio", "Voo acrobático", "Mergulho · Florianópolis", "Kart", "Jiu-Jitsu", "Provas de corrida"],
-      },
-      en: {
-        kicker: "Brazil · Adrenaline & nature",
-        title: "Adventures in Brazil",
-        body: "Challenging myself has always been part of who I am — from the skies above the Serra do Curral and Rio de Janeiro to the ocean depths of Florianópolis.",
-      },
-      pt: {
-        kicker: "Brasil · Adrenalina e natureza",
-        title: "Aventuras no Brasil",
-        body: "Desafiar-me sempre fez parte de quem eu sou — dos céus sobre a Serra do Curral e o Rio de Janeiro às profundezas do mar de Florianópolis.",
-      },
     },
 
-    /* ---- 6 · UNITED STATES ---- */
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  CHAPTER 05 — UNITED STATES · NEW YORK & MIAMI
+     * ────────────────────────────────────────────────────────────────────────── */
     {
-      id: "usa", layout: "story", chapter: "05", flag: "us", side: "left",
-      focus: { coordinates: [-95, 39], dist: 290, match: "United States" },
-      media: {
-        type: "gallery", cols: 2,
-        items: [
-          { src: "images/US_liberty.jpg", en: { cap: "Statue of Liberty" }, pt: { cap: "Estátua da Liberdade" } },
-          { src: "images/US_wtc.jpg", en: { cap: "One World Trade Center" }, pt: { cap: "One World Trade Center" } },
-          { src: "images/US_brooklyn.jpg", en: { cap: "Brooklyn Bridge" }, pt: { cap: "Ponte do Brooklyn" } },
-          { src: "images/US_centralpark.jpg", en: { cap: "Central Park" }, pt: { cap: "Central Park" } },
-          { src: "images/US_nba.jpg", en: { cap: "NBA · Knicks vs Bulls" }, pt: { cap: "NBA · Knicks vs Bulls" } },
-          { src: "images/US_video1.mp4", video: true, en: { cap: "Ferrari California · Miami" }, pt: { cap: "Ferrari California · Miami" } },
-        ],
-      },
-      experiences: {
-        en: ["Statue of Liberty", "One World Trade Center", "Brooklyn Bridge", "Central Park", "9/11 Memorial", "NBA game", "Ferrari California · Miami", "Shooting · AK-47 / MP5 / SCAR 17"],
-        pt: ["Estátua da Liberdade", "One World Trade Center", "Ponte do Brooklyn", "Central Park", "Memorial do 11/09", "Jogo da NBA", "Ferrari California · Miami", "Tiro · AK-47 / MP5 / SCAR 17"],
-      },
-      en: {
-        kicker: "United States · New York & Miami",
-        title: "The American chapter",
-        body: "New York from the Statue of Liberty to One World Trade Center, an NBA night and the 9/11 Memorial — then Miami, driving a Ferrari California and shooting-sport experiences.",
-      },
-      pt: {
-        kicker: "Estados Unidos · Nova York e Miami",
-        title: "O capítulo americano",
-        body: "Nova York, da Estátua da Liberdade ao One World Trade Center, uma noite de NBA e o Memorial do 11 de Setembro — depois Miami, dirigindo uma Ferrari California e experiências de tiro esportivo.",
-      },
-    },
-
-    /* ---- 7 · ENGLAND ---- */
-    {
-      id: "england", layout: "story", chapter: "06", flag: "gb-eng", side: "left",
-      focus: { coordinates: [-1.5, 52.6], dist: 235, match: "England" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/england1.jpg", en: { cap: "Tower of London" }, pt: { cap: "Torre de Londres" } },
-        { src: "images/england2.jpg", en: { cap: "Buckingham Palace" }, pt: { cap: "Palácio de Buckingham" } },
-        { src: "images/england3.jpg", en: { cap: "Monument to the Great Fire" }, pt: { cap: "Monumento ao Grande Incêndio" } },
-        { src: "images/england4.jpg", en: { cap: "St. Paul's Cathedral" }, pt: { cap: "Catedral de St. Paul" } },
-      ] },
-      experiences: { en: ["Tower of London", "Buckingham Palace", "Monument to the Great Fire", "St. Paul's Cathedral"], pt: ["Torre de Londres", "Palácio de Buckingham", "Monumento ao Grande Incêndio", "Catedral de St. Paul"] },
-      en: { kicker: "United Kingdom · England", title: "London & beyond", body: "I explored London extensively — its palaces, parks, cathedrals, world-class museums and historic pubs — experiencing the city's rich history firsthand." },
-      pt: { kicker: "Reino Unido · Inglaterra", title: "Londres e além", body: "Explorei Londres a fundo — seus palácios, parques, catedrais, museus de classe mundial e pubs históricos — vivendo de perto a rica história da cidade." },
-    },
-
-    /* ---- 8 · ITALY ---- */
-    {
-      id: "italy", layout: "story", chapter: "07", flag: "it", side: "right",
-      focus: { coordinates: [12.5, 42], dist: 245, match: "Italy" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/italy1.jpg", en: { cap: "The Colosseum, Rome" }, pt: { cap: "Coliseu, Roma" } },
-        { src: "images/italy2.jpg", en: { cap: "Vatican & St. Peter's" }, pt: { cap: "Vaticano e São Pedro" } },
-        { src: "images/italy3.jpg", en: { cap: "Trevi Fountain" }, pt: { cap: "Fontana di Trevi" } },
-        { src: "images/italy4.jpg", en: { cap: "Turin · Shroud of Turin" }, pt: { cap: "Turim · Sudário" } },
-        { src: "images/italy5.jpg", en: { cap: "Monument to Victor Emmanuel II" }, pt: { cap: "Monumento a Vítor Emanuel II" } },
-        { src: "images/italy_paraglider.mp4", video: true, en: { cap: "Paragliding · Turin" }, pt: { cap: "Parapente · Turim" } },
-      ] },
-      experiences: { en: ["Italian citizenship", "Rome & the Colosseum", "Vatican Museums", "Trevi Fountain", "Turin · Shroud of Turin", "Monument to Victor Emmanuel II", "Paragliding · Turin"], pt: ["Cidadania italiana", "Roma e o Coliseu", "Museus do Vaticano", "Fontana di Trevi", "Turim · Sudário", "Monumento a Vítor Emanuel II", "Parapente · Turim"] },
-      en: { kicker: "Italy · Roots & history", title: "Obtaining my Italian citizenship", body: "Italy is part of who I am — I obtained my Italian citizenship and explored Rome, the Vatican, Castel Sant'Angelo, the Trevi Fountain and Turin, even completing a paragliding flight." },
-      pt: { kicker: "Itália · Raízes e história", title: "Obtendo minha cidadania italiana", body: "A Itália faz parte de quem eu sou — obtive a cidadania italiana e explorei Roma, o Vaticano, o Castel Sant'Angelo, a Fontana di Trevi e Turim, incluindo um voo de parapente." },
-    },
-
-    /* ---- 9 · IRELAND ---- */
-    {
-      id: "ireland", layout: "story", chapter: "08", flag: "ie", side: "left",
-      focus: { coordinates: [-8, 53.3], dist: 230, match: "Ireland" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/ireland1.jpg", en: { cap: "Dublin Castle" }, pt: { cap: "Castelo de Dublin" } },
-        { src: "images/ireland2.jpg", en: { cap: "Malahide Castle" }, pt: { cap: "Castelo de Malahide" } },
-        { src: "images/ireland3.jpg", en: { cap: "Temple Bar, Dublin" }, pt: { cap: "Temple Bar, Dublin" } },
-        { src: "images/ireland4.jpg", en: { cap: "Dublin city" }, pt: { cap: "Cidade de Dublin" } },
-      ] },
-      experiences: { en: ["Dublin Castle", "Temple Bar", "Malahide Castle", "Cultural landmarks"], pt: ["Castelo de Dublin", "Temple Bar", "Castelo de Malahide", "Pontos culturais"] },
-      en: { kicker: "Ireland · The Emerald Isle", title: "Discovering Ireland", body: "In Ireland I visited Dublin Castle, the lively Temple Bar, Malahide Castle and many cultural landmarks — and lived here while working in international tax." },
-      pt: { kicker: "Irlanda · A Ilha Esmeralda", title: "Descobrindo a Irlanda", body: "Na Irlanda visitei o Castelo de Dublin, o animado Temple Bar, o Castelo de Malahide e diversos pontos culturais — e morei aqui enquanto trabalhava com tributação internacional." },
-    },
-
-    /* ---- 10 · NORTHERN IRELAND ---- */
-    {
-      id: "northern-ireland", layout: "story", chapter: "09", flag: "gb-nir", side: "right",
-      focus: { coordinates: [-6.6, 54.7], dist: 225, match: "Northern Ireland" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/nireland1.jpg", en: { cap: "Giant's Causeway" }, pt: { cap: "Calçada dos Gigantes" } },
-        { src: "images/nireland2.jpg", en: { cap: "The Dark Hedges" }, pt: { cap: "Dark Hedges" } },
-        { src: "images/nireland3.jpg", en: { cap: "Dunluce Castle" }, pt: { cap: "Castelo de Dunluce" } },
-        { src: "images/nireland4.jpg", en: { cap: "Titanic Belfast" }, pt: { cap: "Titanic Belfast" } },
-      ] },
-      experiences: { en: ["Giant's Causeway", "Dunluce Castle", "The Dark Hedges", "Titanic Belfast", "Game of Thrones locations"], pt: ["Calçada dos Gigantes", "Castelo de Dunluce", "Dark Hedges", "Titanic Belfast", "Locações de Game of Thrones"] },
-      en: { kicker: "United Kingdom · Northern Ireland", title: "Legends & landscapes", body: "Northern Ireland enchanted me — the Giant's Causeway, Dunluce Castle, the Dark Hedges, Titanic Belfast and several iconic Game of Thrones locations." },
-      pt: { kicker: "Reino Unido · Irlanda do Norte", title: "Lendas e paisagens", body: "A Irlanda do Norte me encantou — a Calçada dos Gigantes, o Castelo de Dunluce, as Dark Hedges, o Titanic Belfast e várias locações icônicas de Game of Thrones." },
-    },
-
-    /* ---- 11 · SCOTLAND ---- */
-    {
-      id: "scotland", layout: "story", chapter: "10", flag: "gb-sct", side: "left",
-      focus: { coordinates: [-4.2, 56.8], dist: 230, match: "Scotland" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/scotland1.jpg", en: { cap: "Edinburgh Castle" }, pt: { cap: "Castelo de Edimburgo" } },
-        { src: "images/scotland2.jpg", en: { cap: "Edinburgh Castle" }, pt: { cap: "Castelo de Edimburgo" } },
-      ] },
-      experiences: { en: ["Edinburgh Castle", "The Royal Mile", "Old & New Town", "Scottish Highlands"], pt: ["Castelo de Edimburgo", "Royal Mile", "Cidade Velha e Nova", "Terras Altas da Escócia"] },
-      en: { kicker: "United Kingdom · Scotland", title: "Edinburgh & the Highlands", body: "Scotland captivated me with the majestic Edinburgh Castle overlooking the city, the historic Royal Mile and the dramatic landscapes of the Highlands." },
-      pt: { kicker: "Reino Unido · Escócia", title: "Edimburgo e as Highlands", body: "A Escócia me cativou com o majestoso Castelo de Edimburgo dominando a cidade, a histórica Royal Mile e as paisagens dramáticas das Highlands." },
-    },
-
-    /* ---- 12 · WALES ---- */
-    {
-      id: "wales", layout: "story", chapter: "11", flag: "gb-wls", side: "right",
-      focus: { coordinates: [-3.8, 52.4], dist: 225, match: "Wales" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/wales1.jpg", en: { cap: "Holyhead" }, pt: { cap: "Holyhead" } },
-        { src: "images/wales2.jpg", en: { cap: "Holyhead" }, pt: { cap: "Holyhead" } },
-      ] },
-      experiences: { en: ["Holyhead", "Anglesey coast", "Welsh landscapes"], pt: ["Holyhead", "Costa de Anglesey", "Paisagens galesas"] },
-      en: { kicker: "United Kingdom · Wales", title: "The Welsh coast", body: "In Wales I discovered Holyhead and the rugged beauty of the Anglesey coast — a land of dramatic shorelines, castles and proud heritage." },
-      pt: { kicker: "Reino Unido · País de Gales", title: "A costa galesa", body: "No País de Gales descobri Holyhead e a beleza áspera da costa de Anglesey — uma terra de litorais dramáticos, castelos e orgulhosa herança." },
-    },
-
-    /* ---- 13 · FRANCE ---- */
-    {
-      id: "france", layout: "story", chapter: "12", flag: "fr", side: "left",
-      focus: { coordinates: [2.4, 46.8], dist: 250, match: "France" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/france1.jpg", en: { cap: "Eiffel Tower" }, pt: { cap: "Torre Eiffel" } },
-        { src: "images/france2.jpg", en: { cap: "Palace of Versailles" }, pt: { cap: "Palácio de Versalhes" } },
-        { src: "images/france3.jpg", en: { cap: "The Louvre" }, pt: { cap: "Louvre" } },
-        { src: "images/france4.jpg", en: { cap: "Notre-Dame" }, pt: { cap: "Notre-Dame" } },
-      ] },
-      experiences: { en: ["Eiffel Tower", "The Louvre", "Notre-Dame", "Arc de Triomphe", "Montmartre & Sacré-Cœur", "Versailles"], pt: ["Torre Eiffel", "Louvre", "Notre-Dame", "Arco do Triunfo", "Montmartre e Sacré-Cœur", "Versalhes"] },
-      en: { kicker: "France · Art & grandeur", title: "Paris and Versailles", body: "Paris revealed the Eiffel Tower, the Louvre, Notre-Dame, the Arc de Triomphe and Montmartre — crowned by the magnificent Palace of Versailles." },
-      pt: { kicker: "França · Arte e grandeza", title: "Paris e Versalhes", body: "Paris revelou a Torre Eiffel, o Louvre, a Notre-Dame, o Arco do Triunfo e Montmartre — coroados pelo magnífico Palácio de Versalhes." },
-    },
-
-    /* ---- 12 · GERMANY ---- */
-    {
-      id: "germany", layout: "story", chapter: "13", flag: "de", side: "right",
-      focus: { coordinates: [10.4, 51.2], dist: 245, match: "Germany" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/germany1.jpg", en: { cap: "Brandenburg Gate" }, pt: { cap: "Portão de Brandemburgo" } },
-        { src: "images/germany2.jpg", en: { cap: "Sanssouci, Potsdam" }, pt: { cap: "Sanssouci, Potsdam" } },
-        { src: "images/germany3.jpg", en: { cap: "Berlin Wall" }, pt: { cap: "Muro de Berlim" } },
-        { src: "images/germany4.jpg", en: { cap: "Checkpoint Charlie" }, pt: { cap: "Checkpoint Charlie" } },
-      ] },
-      experiences: { en: ["Berlin Wall", "Brandenburg Gate", "Checkpoint Charlie", "Berlin Cathedral", "Sanssouci & New Palace"], pt: ["Muro de Berlim", "Portão de Brandemburgo", "Checkpoint Charlie", "Catedral de Berlim", "Sanssouci e Novo Palácio"] },
-      en: { kicker: "Germany · History & memory", title: "Berlin and Potsdam", body: "In Germany I walked the Berlin Wall, the Brandenburg Gate and Checkpoint Charlie, and explored the grand palaces of Potsdam — history at every turn." },
-      pt: { kicker: "Alemanha · História e memória", title: "Berlim e Potsdam", body: "Na Alemanha percorri o Muro de Berlim, o Portão de Brandemburgo e o Checkpoint Charlie, e explorei os grandiosos palácios de Potsdam — história a cada esquina." },
-    },
-
-    /* ---- 13 · SPAIN ---- */
-    {
-      id: "spain", layout: "story", chapter: "14", flag: "es", side: "left",
-      focus: { coordinates: [-3.7, 40.2], dist: 250, match: "Spain" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/spain1.jpg", en: { cap: "Santiago Bernabéu" }, pt: { cap: "Santiago Bernabéu" } },
-        { src: "images/spain2.jpg", en: { cap: "Toledo" }, pt: { cap: "Toledo" } },
-        { src: "images/spain3.jpg", en: { cap: "Royal Palace of Madrid" }, pt: { cap: "Palácio Real de Madri" } },
-        { src: "images/spain4.jpg", en: { cap: "Prado Museum" }, pt: { cap: "Museu do Prado" } },
-      ] },
-      experiences: { en: ["Santiago Bernabéu", "Royal Palace of Madrid", "Prado Museum", "El Retiro Park", "Toledo · medieval city"], pt: ["Santiago Bernabéu", "Palácio Real de Madri", "Museu do Prado", "Parque do Retiro", "Toledo · cidade medieval"] },
-      en: { kicker: "Spain · Passion & heritage", title: "Madrid and Toledo", body: "Spain brought the Santiago Bernabéu, the Royal Palace, the Prado Museum and El Retiro in Madrid — and the medieval magic of Toledo." },
-      pt: { kicker: "Espanha · Paixão e patrimônio", title: "Madri e Toledo", body: "A Espanha trouxe o Santiago Bernabéu, o Palácio Real, o Museu do Prado e o Retiro em Madri — e a magia medieval de Toledo." },
-    },
-
-    /* ---- 14 · PORTUGAL ---- */
-    {
-      id: "portugal", layout: "story", chapter: "15", flag: "pt", side: "right",
-      focus: { coordinates: [-8.2, 39.6], dist: 235, match: "Portugal" },
-      media: { type: "gallery", cols: 2, items: [
-        { src: "images/portugal1.jpg", en: { cap: "University of Coimbra" }, pt: { cap: "Universidade de Coimbra" } },
-        { src: "images/portugal2.jpg", en: { cap: "Templar Castle, Tomar" }, pt: { cap: "Castelo dos Templários, Tomar" } },
-        { src: "images/portugal3.jpg", en: { cap: "Porto" }, pt: { cap: "Porto" } },
-        { src: "images/portugal4.jpg", en: { cap: "Lisbon" }, pt: { cap: "Lisboa" } },
-        { src: "images/portugal5.jpg", en: { cap: "Braga" }, pt: { cap: "Braga" } },
-        { src: "images/portugal6.jpg", en: { cap: "Guimarães" }, pt: { cap: "Guimarães" } },
-      ] },
-      experiences: { en: ["Porto · Lisbon · Coimbra", "Braga & Guimarães", "Templar Castle · Tomar", "University of Coimbra", "Climbing the Valongo mountains"], pt: ["Porto · Lisboa · Coimbra", "Braga e Guimarães", "Castelo dos Templários · Tomar", "Universidade de Coimbra", "Montanhas de Valongo"] },
-      en: { kicker: "Portugal · A second home", title: "A meaningful chapter", body: "Portugal became a particularly meaningful part of my journey — where I studied, built my career and discovered Porto, Lisbon, Coimbra, the Templar Castle in Tomar and the mountains of Valongo." },
-      pt: { kicker: "Portugal · Um segundo lar", title: "Um capítulo especial", body: "Portugal tornou-se uma parte muito especial da minha jornada — onde estudei, construí minha carreira e descobri o Porto, Lisboa, Coimbra, o Castelo dos Templários em Tomar e as montanhas de Valongo." },
-    },
-
-    /* ---- 15 · GLOBAL ACHIEVEMENTS ---- */
-    {
-      id: "achievements", layout: "story", chapter: "16", side: "right",
-      focus: { overview: true },
-      media: {
-        type: "gallery", cols: 2,
-        stat: { value: "42.195", unit: "KM", en: "Full marathon · Porto", pt: "Maratona completa · Porto" },
-        items: [
-          { src: "images/sports.jpg", en: { cap: "Marathon · Porto" }, pt: { cap: "Maratona · Porto" } },
-          { src: "images/achv1.jpg", en: { cap: "Road races" }, pt: { cap: "Provas de rua" } },
-          { src: "images/achv2.jpg", en: { cap: "Climbing · Valongo" }, pt: { cap: "Montanhismo · Valongo" } },
-          { src: "images/achv_ak47.mp4", video: true, en: { cap: "Shooting · AK-47" }, pt: { cap: "Tiro · AK-47" } },
-          { src: "images/achv_paintball.jpg", en: { cap: "Paintball" }, pt: { cap: "Paintball" } },
-          { src: "images/achv_archery.jpg", en: { cap: "Archery" }, pt: { cap: "Arco e Flecha" } },
-        ],
-      },
-      experiences: { en: ["Full marathon · Porto (42.195 km)", "Half marathon", "Road races", "Jiu-Jitsu", "Mountain climbing · Valongo", "Shooting · AK-47", "Paintball", "Archery"], pt: ["Maratona completa · Porto (42,195 km)", "Meia maratona", "Provas de rua", "Jiu-Jitsu", "Montanhismo · Valongo", "Tiro · AK-47", "Paintball", "Arco e Flecha"] },
-      en: {
-        kicker: "Achievements · Discipline in motion",
-        title: "Pushing my limits",
-        body: "Beyond travel and career, sport has shaped me. Jiu-Jitsu, countless road races, a half marathon and a full marathon completed in Porto — each one reinforcing discipline, resilience and determination.",
-      },
-      pt: {
-        kicker: "Conquistas · Disciplina em movimento",
-        title: "Superando meus limites",
-        body: "Além das viagens e da carreira, o esporte me moldou. Jiu-Jitsu, inúmeras provas de rua, uma meia maratona e uma maratona completa concluída no Porto — cada uma reforçando disciplina, resiliência e determinação.",
-      },
-    },
-
-    /* ---- 16 · REFLECTION ---- */
-    {
-      id: "reflection", layout: "closing", chapter: "17",
+      layout: "chapter",
+      flag:   "USA",
+      chapter: { en: "Chapter 05", pt: "Capítulo 05" },
       focus: { overview: true },
       en: {
-        kicker: "Reflection",
-        title: "The journey continues",
-        body: "Looking back, I see a path built through persistence, curiosity and a willingness to embrace challenges. Growth comes from learning, adapting and remaining open to new opportunities. My story is still being written — and I look forward to the next chapters with the same enthusiasm that has guided me all along.",
+        title:    "United States",
+        subtitle: "New York & Miami",
+        body:     "The neon energy of Miami Beach and the relentless pulse of New York City.",
       },
       pt: {
-        kicker: "Reflexão",
-        title: "A jornada continua",
-        body: "Olhando para trás, vejo um caminho construído com persistência, curiosidade e disposição para abraçar desafios. O crescimento vem de aprender, adaptar-se e permanecer aberto a novas oportunidades. Minha história ainda está sendo escrita — e aguardo os próximos capítulos com o mesmo entusiasmo que me guiou até aqui.",
+        title:    "Estados Unidos",
+        subtitle: "Nova Iorque & Miami",
+        body:     "A energia neon de Miami Beach e o ritmo imparável de Nova Iorque.",
       },
     },
 
-    /* ---- 17 · THANK YOU ---- */
+    /* ── Miami ── */
     {
-      id: "thanks", layout: "thanks", chapter: "",
-      focus: { overview: true },
-      contact: [
-        { type: "email", label: "Email", value: "your.email@example.com", href: "mailto:your.email@example.com" },
-        { type: "linkedin", label: "LinkedIn", value: "linkedin.com/in/your-profile", href: "https://linkedin.com/in/your-profile" },
-      ],
+      layout: "media-text",
+      flag:   "USA",
+      chapter: { en: "Chapter 05 · USA", pt: "Capítulo 05 · EUA" },
+      focus: {
+        coordinates: [-80.1918, 25.7617],
+        camDistance: 1.8,
+        marker:      [-80.1918, 25.7617],
+        markerLabel: { en: "Miami", pt: "Miami" },
+        match:       "United States of America",
+      },
       en: {
-        kicker: "See you at the next destination",
-        title: "Thank you",
-        alt: "Obrigado · Gracias",
-        body: "The journey continues. Thank you for travelling through my story — let's connect.",
+        title:    "Miami",
+        subtitle: "Sun, Speed & Steel",
+        body:     "Ferrari on the road, a Ferrari on the range — and a collection of firearms that would impress any action hero.",
       },
       pt: {
-        kicker: "Até o próximo destino",
-        title: "Obrigado",
-        alt: "Thank you · Gracias",
-        body: "A jornada continua. Obrigado por percorrer a minha história — vamos nos conectar.",
+        title:    "Miami",
+        subtitle: "Sol, Velocidade & Aço",
+        body:     "Ferrari na estrada, Ferrari no stand — e uma coleção de armas que impressionaria qualquer herói de ação.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/miami/photo-1.jpg",      en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/miami/photo-2.jpg",      en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/miami/photo-3.jpg",      en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/miami/ferrari-video.mp4",en: { cap: "Ferrari" },    pt: { cap: "Ferrari" },    video: true },
+          { src: "assets/img/journey/miami/ak47-video.mp4",   en: { cap: "AK-47" },     pt: { cap: "AK-47" },     video: true },
+          { src: "assets/img/journey/miami/scar-video.mp4",   en: { cap: "SCAR" },      pt: { cap: "SCAR" },      video: true },
+          { src: "assets/img/journey/miami/mp5-video.mp4",    en: { cap: "MP5" },       pt: { cap: "MP5" },       video: true },
+        ],
       },
     },
-  ],
-};
+
+    /* ── New York ── */
+    {
+      layout: "media-text",
+      flag:   "USA",
+      chapter: { en: "Chapter 05 · USA", pt: "Capítulo 05 · EUA" },
+      focus: {
+        coordinates: [-74.0060, 40.7128],
+        camDistance: 1.8,
+        marker:      [-74.0060, 40.7128],
+        markerLabel: { en: "New York", pt: "Nova Iorque" },
+        match:       "United States of America",
+      },
+      en: {
+        title:    "New York City",
+        subtitle: "The City That Never Sleeps",
+        body:     "NBA courtside at the Garden, the top of the world at One WTC, and icons that define a skyline.",
+      },
+      pt: {
+        title:    "Nova Iorque",
+        subtitle: "A Cidade Que Nunca Dorme",
+        body:     "NBA no Garden, o topo do mundo no One WTC e ícones que definem uma silhueta única.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/new-york/nba-knicks-bulls.jpg",      en: { cap: "NBA — Knicks vs Bulls" },    pt: { cap: "NBA — Knicks vs Bulls" } },
+          { src: "assets/img/journey/new-york/one-world-trade-center.jpg",en: { cap: "One World Trade Center" },   pt: { cap: "One World Trade Center" } },
+          { src: "assets/img/journey/new-york/empire-state.jpg",          en: { cap: "Empire State Building" },    pt: { cap: "Empire State Building" } },
+          { src: "assets/img/journey/new-york/brooklyn-bridge.jpg",       en: { cap: "Brooklyn Bridge" },          pt: { cap: "Brooklyn Bridge" } },
+          { src: "assets/img/journey/new-york/bull-statue.jpg",           en: { cap: "Charging Bull" },            pt: { cap: "Touro de Wall Street" } },
+          { src: "assets/img/journey/new-york/statue-of-liberty.jpg",     en: { cap: "Statue of Liberty" },        pt: { cap: "Estátua da Liberdade" } },
+          { src: "assets/img/journey/new-york/911-museum.jpg",            en: { cap: "9/11 Museum" },              pt: { cap: "Museu do 11 de Setembro" } },
+          { src: "assets/img/journey/new-york/photo-8.jpg",               en: { cap: "" },                         pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  UNITED KINGDOM
+     * ────────────────────────────────────────────────────────────────────────── */
+
+    /* ── London ── */
+    {
+      layout: "media-text",
+      flag:   "GBR",
+      chapter: { en: "United Kingdom", pt: "Reino Unido" },
+      focus: {
+        coordinates: [-0.1278, 51.5074],
+        camDistance: 1.8,
+        marker:      [-0.1278, 51.5074],
+        markerLabel: { en: "London", pt: "Londres" },
+        match:       "England",
+      },
+      en: {
+        title:    "London",
+        subtitle: "Capital of Everything",
+        body:     "Big Ben, Tower Bridge, Buckingham Palace — and the endless energy of one of the world's greatest cities.",
+      },
+      pt: {
+        title:    "Londres",
+        subtitle: "Capital de Tudo",
+        body:     "Big Ben, Tower Bridge, Buckingham Palace — e a energia interminável de uma das maiores cidades do mundo.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/london/photo-1.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/london/photo-2.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/london/photo-3.jpg", en: { cap: "" }, pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Northern Ireland (name on map only) ── */
+    {
+      layout: "text-only",
+      flag:   "GBR",
+      chapter: { en: "United Kingdom", pt: "Reino Unido" },
+      focus: {
+        coordinates: [-6.4923, 54.5973],
+        camDistance: 2.0,
+        marker:      [-6.4923, 54.5973],
+        markerLabel: { en: "Northern Ireland", pt: "Irlanda do Norte" },
+        match:       "Northern Ireland",
+      },
+      en: {
+        title:    "Northern Ireland",
+        subtitle: "Giant's Causeway & Beyond",
+        body:     "The rugged coast, basalt columns of the Giant's Causeway, and the wild landscape of the north.",
+      },
+      pt: {
+        title:    "Irlanda do Norte",
+        subtitle: "Giant's Causeway e Além",
+        body:     "A costa acidentada, as colunas de basalto da Calçada do Gigante e a paisagem selvagem do norte.",
+      },
+    },
+
+    /* ── Edinburgh ── */
+    {
+      layout: "media-text",
+      flag:   "GBR",
+      chapter: { en: "United Kingdom", pt: "Reino Unido" },
+      focus: {
+        coordinates: [-3.1883, 55.9533],
+        camDistance: 1.9,
+        marker:      [-3.1883, 55.9533],
+        markerLabel: { en: "Edinburgh", pt: "Edimburgo" },
+        match:       "Scotland",
+      },
+      en: {
+        title:    "Edinburgh",
+        subtitle: "Scotland's Crown",
+        body:     "The castle on the volcanic rock, the Royal Mile, and the wild Highlands visible from Arthur's Seat.",
+      },
+      pt: {
+        title:    "Edimburgo",
+        subtitle: "A Coroa da Escócia",
+        body:     "O castelo sobre a rocha vulcânica, a Royal Mile e as Highlands visíveis do Arthur's Seat.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/edinburgh/photo-1.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/edinburgh/photo-2.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/edinburgh/photo-3.jpg", en: { cap: "" }, pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Holyhead ── */
+    {
+      layout: "media-text",
+      flag:   "GBR",
+      chapter: { en: "United Kingdom", pt: "Reino Unido" },
+      focus: {
+        coordinates: [-4.6330, 53.3099],
+        camDistance: 2.0,
+        marker:      [-4.6330, 53.3099],
+        markerLabel: { en: "Holyhead", pt: "Holyhead" },
+        match:       "Wales",
+      },
+      en: {
+        title:    "Holyhead",
+        subtitle: "Wales & the Irish Sea",
+        body:     "The ferry port connecting Wales to Ireland, with dramatic coastal views and the wild Welsh landscape.",
+      },
+      pt: {
+        title:    "Holyhead",
+        subtitle: "País de Gales & Mar da Irlanda",
+        body:     "O porto de ferry que liga o País de Gales à Irlanda, com vistas costeiras dramáticas.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/holyhead/photo-1.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/holyhead/photo-2.jpg", en: { cap: "" }, pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  IRELAND
+     * ────────────────────────────────────────────────────────────────────────── */
+    {
+      layout: "media-text",
+      flag:   "IRL",
+      chapter: { en: "Ireland", pt: "Irlanda" },
+      focus: {
+        coordinates: [-8.2439, 53.4129],
+        camDistance: 2.0,
+        marker:      [-8.2439, 53.4129],
+        markerLabel: { en: "Ireland", pt: "Irlanda" },
+        match:       "Ireland",
+      },
+      en: {
+        title:    "Ireland",
+        subtitle: "The Emerald Isle",
+        body:     "Green cliffs, cosy pubs, and the warmth of Irish hospitality. A country that feels like home.",
+      },
+      pt: {
+        title:    "Irlanda",
+        subtitle: "A Ilha Esmeralda",
+        body:     "Falésias verdes, pubs acolhedores e a hospitalidade irlandesa. Um país que parece lar.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/ireland/photo-1.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/ireland/photo-2.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/ireland/photo-3.jpg", en: { cap: "" }, pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  ITALY
+     * ────────────────────────────────────────────────────────────────────────── */
+
+    /* ── Rome ── */
+    {
+      layout: "media-text",
+      flag:   "ITA",
+      chapter: { en: "Italy", pt: "Itália" },
+      focus: {
+        coordinates: [12.4964, 41.9028],
+        camDistance: 1.8,
+        marker:      [12.4964, 41.9028],
+        markerLabel: { en: "Rome", pt: "Roma" },
+        match:       "Italy",
+      },
+      en: {
+        title:    "Rome",
+        subtitle: "The Eternal City",
+        body:     "The Colosseum, the Vatican, the Trevi Fountain — two thousand years of history in every cobblestone.",
+      },
+      pt: {
+        title:    "Roma",
+        subtitle: "A Cidade Eterna",
+        body:     "O Coliseu, o Vaticano, a Fontana di Trevi — dois mil anos de história em cada pedra.",
+      },
+      media: {
+        type: "gallery",
+        cols: 3,
+        items: [
+          { src: "assets/img/journey/rome/colosseum.jpg",     en: { cap: "Colosseum" },       pt: { cap: "Coliseu" } },
+          { src: "assets/img/journey/rome/vatican.jpg",       en: { cap: "Vatican" },          pt: { cap: "Vaticano" } },
+          { src: "assets/img/journey/rome/trevi-fountain.jpg",en: { cap: "Trevi Fountain" },   pt: { cap: "Fontana di Trevi" } },
+          { src: "assets/img/journey/rome/pantheon.jpg",      en: { cap: "Pantheon" },         pt: { cap: "Panteão" } },
+          { src: "assets/img/journey/rome/spanish-steps.jpg", en: { cap: "Spanish Steps" },    pt: { cap: "Escadaria Espanhola" } },
+          { src: "assets/img/journey/rome/photo-6.jpg",       en: { cap: "" },                 pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Turin / Torino ── */
+    {
+      layout: "media-text",
+      flag:   "ITA",
+      chapter: { en: "Italy", pt: "Itália" },
+      focus: {
+        coordinates: [7.6869, 45.0703],
+        camDistance: 1.9,
+        marker:      [7.6869, 45.0703],
+        markerLabel: { en: "Turin", pt: "Turim" },
+        match:       "Italy",
+      },
+      en: {
+        title:    "Turin",
+        subtitle: "Alps at the Doorstep",
+        body:     "The elegant Savoy city beneath the Alps — culture, chocolate, and paragliding over the mountains.",
+      },
+      pt: {
+        title:    "Turim",
+        subtitle: "Os Alpes à Porta",
+        body:     "A elegante cidade dos Sabóia sob os Alpes — cultura, chocolate e parapente sobre as montanhas.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/turin/photo-1.jpg",         en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/turin/photo-2.jpg",         en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/turin/photo-3.jpg",         en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/turin/paraglider-video.mp4",en: { cap: "Paragliding" }, pt: { cap: "Parapente" }, video: true },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  FRANCE
+     * ────────────────────────────────────────────────────────────────────────── */
+
+    /* ── Paris ── */
+    {
+      layout: "media-text",
+      flag:   "FRA",
+      chapter: { en: "France", pt: "França" },
+      focus: {
+        coordinates: [2.3522, 48.8566],
+        camDistance: 1.8,
+        marker:      [2.3522, 48.8566],
+        markerLabel: { en: "Paris", pt: "Paris" },
+        match:       "France",
+      },
+      en: {
+        title:    "Paris",
+        subtitle: "La Ville Lumière",
+        body:     "The Eiffel Tower at golden hour, the Louvre's endless corridors, and the romance of the Seine.",
+      },
+      pt: {
+        title:    "Paris",
+        subtitle: "La Ville Lumière",
+        body:     "A Torre Eiffel na hora dourada, os corredores infinitos do Louvre e o romance do Sena.",
+      },
+      media: {
+        type: "gallery",
+        cols: 3,
+        items: [
+          { src: "assets/img/journey/paris/eiffel-tower.jpg",  en: { cap: "Eiffel Tower" },    pt: { cap: "Torre Eiffel" } },
+          { src: "assets/img/journey/paris/louvre.jpg",        en: { cap: "The Louvre" },       pt: { cap: "O Louvre" } },
+          { src: "assets/img/journey/paris/notre-dame.jpg",    en: { cap: "Notre-Dame" },       pt: { cap: "Notre-Dame" } },
+          { src: "assets/img/journey/paris/champs-elysees.jpg",en: { cap: "Champs-Élysées" },  pt: { cap: "Champs-Élysées" } },
+          { src: "assets/img/journey/paris/arc-triomphe.jpg",  en: { cap: "Arc de Triomphe" },  pt: { cap: "Arco do Triunfo" } },
+          { src: "assets/img/journey/paris/photo-6.jpg",       en: { cap: "" },                 pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Versailles ── */
+    {
+      layout: "media-text",
+      flag:   "FRA",
+      chapter: { en: "France", pt: "França" },
+      focus: {
+        coordinates: [2.1204, 48.8049],
+        camDistance: 1.9,
+        marker:      [2.1204, 48.8049],
+        markerLabel: { en: "Versailles", pt: "Versalhes" },
+        match:       "France",
+      },
+      en: {
+        title:    "Versailles",
+        subtitle: "Palace of the Sun King",
+        body:     "Gilded halls, sculpted gardens, and the Hall of Mirrors — Versailles is a world apart.",
+      },
+      pt: {
+        title:    "Versalhes",
+        subtitle: "Palácio do Rei Sol",
+        body:     "Salões dourados, jardins esculpidos e a Galeria dos Espelhos — Versalhes é um mundo à parte.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/versailles/palace.jpg",       en: { cap: "Palace" },             pt: { cap: "Palácio" } },
+          { src: "assets/img/journey/versailles/hall-of-mirrors.jpg",en:{ cap: "Hall of Mirrors" },   pt: { cap: "Galeria dos Espelhos" } },
+          { src: "assets/img/journey/versailles/gardens.jpg",      en: { cap: "Gardens" },            pt: { cap: "Jardins" } },
+          { src: "assets/img/journey/versailles/photo-4.jpg",      en: { cap: "" },                   pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  GERMANY
+     * ────────────────────────────────────────────────────────────────────────── */
+
+    /* ── Berlin ── */
+    {
+      layout: "media-text",
+      flag:   "DEU",
+      chapter: { en: "Germany", pt: "Alemanha" },
+      focus: {
+        coordinates: [13.4050, 52.5200],
+        camDistance: 1.8,
+        marker:      [13.4050, 52.5200],
+        markerLabel: { en: "Berlin", pt: "Berlim" },
+        match:       "Germany",
+      },
+      en: {
+        title:    "Berlin",
+        subtitle: "History, Art & Energy",
+        body:     "The Brandenburg Gate, the remnants of the Wall, East Side Gallery — and a nightlife without equal.",
+      },
+      pt: {
+        title:    "Berlim",
+        subtitle: "História, Arte & Energia",
+        body:     "O Portão de Brandemburgo, os restos do Muro, a East Side Gallery — e uma vida noturna sem igual.",
+      },
+      media: {
+        type: "gallery",
+        cols: 3,
+        items: [
+          { src: "assets/img/journey/berlin/brandenburger-tor.jpg", en: { cap: "Brandenburg Gate" },   pt: { cap: "Portão de Brandemburgo" } },
+          { src: "assets/img/journey/berlin/berlin-wall.jpg",       en: { cap: "Berlin Wall" },        pt: { cap: "Muro de Berlim" } },
+          { src: "assets/img/journey/berlin/east-side-gallery.jpg", en: { cap: "East Side Gallery" },  pt: { cap: "East Side Gallery" } },
+          { src: "assets/img/journey/berlin/reichstag.jpg",         en: { cap: "Reichstag" },          pt: { cap: "Reichstag" } },
+          { src: "assets/img/journey/berlin/checkpoint-charlie.jpg",en: { cap: "Checkpoint Charlie" }, pt: { cap: "Checkpoint Charlie" } },
+          { src: "assets/img/journey/berlin/photo-6.jpg",           en: { cap: "" },                   pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Potsdam ── */
+    {
+      layout: "media-text",
+      flag:   "DEU",
+      chapter: { en: "Germany", pt: "Alemanha" },
+      focus: {
+        coordinates: [13.0636, 52.3906],
+        camDistance: 1.9,
+        marker:      [13.0636, 52.3906],
+        markerLabel: { en: "Potsdam", pt: "Potsdam" },
+        match:       "Germany",
+      },
+      en: {
+        title:    "Potsdam",
+        subtitle: "Prussian Splendour",
+        body:     "Sanssouci Palace, baroque gardens, and the Dutch Quarter — a royal escape just outside Berlin.",
+      },
+      pt: {
+        title:    "Potsdam",
+        subtitle: "Esplendor Prussiano",
+        body:     "O Palácio Sanssouci, jardins barrocos e o Bairro Holandês — uma fuga real perto de Berlim.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/potsdam/sanssouci.jpg",     en: { cap: "Sanssouci Palace" },  pt: { cap: "Palácio Sanssouci" } },
+          { src: "assets/img/journey/potsdam/dutch-quarter.jpg", en: { cap: "Dutch Quarter" },     pt: { cap: "Bairro Holandês" } },
+          { src: "assets/img/journey/potsdam/gardens.jpg",       en: { cap: "Gardens" },           pt: { cap: "Jardins" } },
+          { src: "assets/img/journey/potsdam/photo-4.jpg",       en: { cap: "" },                  pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  SPAIN
+     * ────────────────────────────────────────────────────────────────────────── */
+
+    /* ── Madrid ── */
+    {
+      layout: "media-text",
+      flag:   "ESP",
+      chapter: { en: "Spain", pt: "Espanha" },
+      focus: {
+        coordinates: [-3.7038, 40.4168],
+        camDistance: 1.8,
+        marker:      [-3.7038, 40.4168],
+        markerLabel: { en: "Madrid", pt: "Madrid" },
+        match:       "Spain",
+      },
+      en: {
+        title:    "Madrid",
+        subtitle: "Passion & Culture",
+        body:     "The Prado, Retiro Park, the Royal Palace — and the electric atmosphere of a city that never slows down.",
+      },
+      pt: {
+        title:    "Madrid",
+        subtitle: "Paixão & Cultura",
+        body:     "O Prado, o Parque del Retiro, o Palácio Real — e a atmosfera elétrica de uma cidade que nunca abranda.",
+      },
+      media: {
+        type: "gallery",
+        cols: 3,
+        items: [
+          { src: "assets/img/journey/madrid/prado.jpg",         en: { cap: "Prado Museum" },   pt: { cap: "Museu do Prado" } },
+          { src: "assets/img/journey/madrid/retiro-park.jpg",   en: { cap: "Retiro Park" },    pt: { cap: "Parque del Retiro" } },
+          { src: "assets/img/journey/madrid/royal-palace.jpg",  en: { cap: "Royal Palace" },   pt: { cap: "Palácio Real" } },
+          { src: "assets/img/journey/madrid/puerta-del-sol.jpg",en: { cap: "Puerta del Sol" }, pt: { cap: "Puerta del Sol" } },
+          { src: "assets/img/journey/madrid/gran-via.jpg",      en: { cap: "Gran Vía" },       pt: { cap: "Gran Vía" } },
+          { src: "assets/img/journey/madrid/photo-6.jpg",       en: { cap: "" },               pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Toledo ── */
+    {
+      layout: "media-text",
+      flag:   "ESP",
+      chapter: { en: "Spain", pt: "Espanha" },
+      focus: {
+        coordinates: [-4.0244, 39.8628],
+        camDistance: 1.9,
+        marker:      [-4.0244, 39.8628],
+        markerLabel: { en: "Toledo", pt: "Toledo" },
+        match:       "Spain",
+      },
+      en: {
+        title:    "Toledo",
+        subtitle: "City of Three Cultures",
+        body:     "The medieval walled city where Christians, Muslims, and Jews once lived side by side on a granite hill.",
+      },
+      pt: {
+        title:    "Toledo",
+        subtitle: "Cidade das Três Culturas",
+        body:     "A cidade medieval amuralhada onde cristãos, muçulmanos e judeus coabitaram sobre um planalto granítico.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/toledo/alcazar.jpg",    en: { cap: "Alcázar" },       pt: { cap: "Alcázar" } },
+          { src: "assets/img/journey/toledo/cathedral.jpg",  en: { cap: "Cathedral" },      pt: { cap: "Catedral" } },
+          { src: "assets/img/journey/toledo/old-town.jpg",   en: { cap: "Old Town" },       pt: { cap: "Cidade Velha" } },
+          { src: "assets/img/journey/toledo/photo-4.jpg",    en: { cap: "" },               pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  PORTUGAL
+     * ────────────────────────────────────────────────────────────────────────── */
+
+    /* ── Porto ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Portugal", pt: "Portugal" },
+      focus: {
+        coordinates: [-8.6291, 41.1496],
+        camDistance: 1.8,
+        marker:      [-8.6291, 41.1496],
+        markerLabel: { en: "Porto", pt: "Porto" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Porto",
+        subtitle: "Home Base",
+        body:     "The city of bridges, port wine, and azulejos — the place that made me the person I am today.",
+      },
+      pt: {
+        title:    "Porto",
+        subtitle: "A Minha Base",
+        body:     "A cidade das pontes, do vinho do Porto e dos azulejos — o lugar que me fez a pessoa que sou hoje.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/porto/photo-1.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/porto/photo-2.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/porto/photo-3.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/porto/photo-4.jpg", en: { cap: "" }, pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Braga / Guimarães / Santa Maria da Feira ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Portugal", pt: "Portugal" },
+      focus: {
+        coordinates: [-8.4265, 41.5454],
+        camDistance: 1.9,
+        marker:      [-8.4265, 41.5454],
+        markerLabel: { en: "Braga & North", pt: "Braga & Norte" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Braga · Guimarães · Feira",
+        subtitle: "The Cradle of Portugal",
+        body:     "Bom Jesus, the castle of Guimarães where Portugal was born, and the medieval fair of Santa Maria da Feira.",
+      },
+      pt: {
+        title:    "Braga · Guimarães · Feira",
+        subtitle: "O Berço de Portugal",
+        body:     "Bom Jesus, o castelo de Guimarães onde Portugal nasceu, e a feira medieval de Santa Maria da Feira.",
+      },
+      media: {
+        type: "gallery",
+        cols: 3,
+        items: [
+          { src: "assets/img/journey/north-portugal/braga-bom-jesus.jpg",     en: { cap: "Bom Jesus, Braga" },          pt: { cap: "Bom Jesus, Braga" } },
+          { src: "assets/img/journey/north-portugal/braga-photo-2.jpg",       en: { cap: "" },                          pt: { cap: "" } },
+          { src: "assets/img/journey/north-portugal/guimaraes-castle.jpg",    en: { cap: "Castle of Guimarães" },       pt: { cap: "Castelo de Guimarães" } },
+          { src: "assets/img/journey/north-portugal/guimaraes-photo-2.jpg",   en: { cap: "" },                          pt: { cap: "" } },
+          { src: "assets/img/journey/north-portugal/feira-medieval.jpg",      en: { cap: "Medieval Fair — Feira" },     pt: { cap: "Feira Medieval — Feira" } },
+          { src: "assets/img/journey/north-portugal/feira-photo-2.jpg",       en: { cap: "" },                          pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Tomar ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Portugal", pt: "Portugal" },
+      focus: {
+        coordinates: [-8.4105, 39.6023],
+        camDistance: 1.9,
+        marker:      [-8.4105, 39.6023],
+        markerLabel: { en: "Tomar", pt: "Tomar" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Tomar",
+        subtitle: "Knights Templar Capital",
+        body:     "The Convent of Christ, the Templar castle, and the mystical heritage of the Knights Templar in Portugal.",
+      },
+      pt: {
+        title:    "Tomar",
+        subtitle: "Capital Templária",
+        body:     "O Convento de Cristo, o castelo templário e o legado místico dos Cavaleiros Templários em Portugal.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/tomar/convento-cristo.jpg", en: { cap: "Convent of Christ" }, pt: { cap: "Convento de Cristo" } },
+          { src: "assets/img/journey/tomar/castle.jpg",          en: { cap: "Templar Castle" },    pt: { cap: "Castelo Templário" } },
+          { src: "assets/img/journey/tomar/photo-3.jpg",         en: { cap: "" },                  pt: { cap: "" } },
+          { src: "assets/img/journey/tomar/photo-4.jpg",         en: { cap: "" },                  pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Coimbra ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Portugal", pt: "Portugal" },
+      focus: {
+        coordinates: [-8.4291, 40.2033],
+        camDistance: 1.9,
+        marker:      [-8.4291, 40.2033],
+        markerLabel: { en: "Coimbra", pt: "Coimbra" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Coimbra",
+        subtitle: "City of Knowledge",
+        body:     "The oldest university in Portugal, the Joanina Library, and the melancholy sound of Coimbra fado.",
+      },
+      pt: {
+        title:    "Coimbra",
+        subtitle: "Cidade do Conhecimento",
+        body:     "A mais antiga universidade de Portugal, a Biblioteca Joanina e o som melancólico do fado de Coimbra.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/coimbra/university.jpg",       en: { cap: "University of Coimbra" }, pt: { cap: "Universidade de Coimbra" } },
+          { src: "assets/img/journey/coimbra/joanina-library.jpg",  en: { cap: "Joanina Library" },      pt: { cap: "Biblioteca Joanina" } },
+          { src: "assets/img/journey/coimbra/photo-3.jpg",          en: { cap: "" },                     pt: { cap: "" } },
+          { src: "assets/img/journey/coimbra/photo-4.jpg",          en: { cap: "" },                     pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Nazaré ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Portugal", pt: "Portugal" },
+      focus: {
+        coordinates: [-8.8957, 39.6009],
+        camDistance: 1.9,
+        marker:      [-8.8957, 39.6009],
+        markerLabel: { en: "Nazaré", pt: "Nazaré" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Nazaré",
+        subtitle: "World's Biggest Waves",
+        body:     "The legendary surf mecca where the world's biggest waves break — and where fishermen still dry their catch on the shore.",
+      },
+      pt: {
+        title:    "Nazaré",
+        subtitle: "As Maiores Ondas do Mundo",
+        body:     "A lendária meca do surf onde quebram as maiores ondas do mundo — e onde os pescadores ainda secam o peixe na praia.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/nazare/big-waves.jpg",  en: { cap: "Giant waves" },   pt: { cap: "Ondas gigantes" } },
+          { src: "assets/img/journey/nazare/lighthouse.jpg", en: { cap: "Lighthouse" },    pt: { cap: "Farol" } },
+          { src: "assets/img/journey/nazare/photo-3.jpg",    en: { cap: "" },              pt: { cap: "" } },
+          { src: "assets/img/journey/nazare/photo-4.jpg",    en: { cap: "" },              pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Valongo (Rock Climbing) ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Portugal", pt: "Portugal" },
+      focus: {
+        coordinates: [-8.4980, 41.1800],
+        camDistance: 1.9,
+        marker:      [-8.4980, 41.1800],
+        markerLabel: { en: "Valongo", pt: "Valongo" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Valongo",
+        subtitle: "Vertical Limits",
+        body:     "Rock climbing on the granite faces of Valongo — pushing limits, finding balance, and trusting the rope.",
+      },
+      pt: {
+        title:    "Valongo",
+        subtitle: "Limites Verticais",
+        body:     "Escalada nas faces de granito de Valongo — ultrapassar limites, encontrar equilíbrio e confiar na corda.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/valongo/climbing-1.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/valongo/climbing-2.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/valongo/climbing-3.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/valongo/climbing-4.jpg", en: { cap: "" }, pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Lisbon ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Portugal", pt: "Portugal" },
+      focus: {
+        coordinates: [-9.1393, 38.7223],
+        camDistance: 1.8,
+        marker:      [-9.1393, 38.7223],
+        markerLabel: { en: "Lisbon", pt: "Lisboa" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Lisbon",
+        subtitle: "City of Seven Hills",
+        body:     "Alfama, Belém, the 25 de Abril Bridge — Lisbon is poetry, light, and the sound of the tram on cobblestones.",
+      },
+      pt: {
+        title:    "Lisboa",
+        subtitle: "Cidade das Sete Colinas",
+        body:     "Alfama, Belém, a Ponte 25 de Abril — Lisboa é poesia, luz e o som do eléctrico sobre as calçadas.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/lisbon/alfama.jpg",           en: { cap: "Alfama" },                pt: { cap: "Alfama" } },
+          { src: "assets/img/journey/lisbon/belem-tower.jpg",      en: { cap: "Tower of Belém" },        pt: { cap: "Torre de Belém" } },
+          { src: "assets/img/journey/lisbon/25-abril-bridge.jpg",  en: { cap: "25 de Abril Bridge" },    pt: { cap: "Ponte 25 de Abril" } },
+          { src: "assets/img/journey/lisbon/photo-4.jpg",          en: { cap: "" },                      pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  ACHIEVEMENTS — DISCIPLINE IN MOTION (RUNNING)
+     * ────────────────────────────────────────────────────────────────────────── */
+    {
+      layout: "chapter",
+      flag:   "PRT",
+      chapter: { en: "Achievements", pt: "Conquistas" },
+      focus: { overview: true },
+      en: {
+        title:    "Discipline in Motion",
+        subtitle: "Running Achievements",
+        body:     "Miles trained, finish lines crossed, medals earned. Every race is a lesson in pushing further.",
+      },
+      pt: {
+        title:    "Disciplina em Movimento",
+        subtitle: "Conquistas de Corrida",
+        body:     "Quilómetros treinados, linhas de chegada cruzadas, medalhas conquistadas. Cada corrida é uma lição de superação.",
+      },
+    },
+
+    /* ── Porto Marathon ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Achievements · Running", pt: "Conquistas · Corrida" },
+      focus: {
+        coordinates: [-8.6291, 41.1496],
+        camDistance: 1.9,
+        marker:      [-8.6291, 41.1496],
+        markerLabel: { en: "Porto Marathon", pt: "Maratona do Porto" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Porto Marathon",
+        subtitle: "42.195 km",
+        body:     "The full marathon — 42.195 km through the streets of Porto. The hardest and most rewarding 4 hours of running.",
+      },
+      pt: {
+        title:    "Maratona do Porto",
+        subtitle: "42.195 km",
+        body:     "A maratona completa — 42.195 km pelas ruas do Porto. As 4 horas de corrida mais difíceis e gratificantes.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/running/porto-marathon-1.jpg", en: { cap: "Porto Marathon" }, pt: { cap: "Maratona do Porto" } },
+          { src: "assets/img/journey/running/porto-marathon-2.jpg", en: { cap: "" },               pt: { cap: "" } },
+          { src: "assets/img/journey/running/porto-marathon-3.jpg", en: { cap: "" },               pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Porto Half Marathon ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Achievements · Running", pt: "Conquistas · Corrida" },
+      focus: {
+        coordinates: [-8.6291, 41.1496],
+        camDistance: 1.9,
+        marker:      [-8.6291, 41.1496],
+        markerLabel: { en: "Porto Half Marathon", pt: "Meia Maratona do Porto" },
+        match:       "Portugal",
+      },
+      en: {
+        title:    "Porto Half Marathon",
+        subtitle: "21.1 km",
+        body:     "The iconic half marathon along the Douro riverfront — a race that unites the city every year.",
+      },
+      pt: {
+        title:    "Meia Maratona do Porto",
+        subtitle: "21.1 km",
+        body:     "A icónica meia maratona ao longo da margem do Douro — uma corrida que une a cidade todos os anos.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/running/porto-half-1.jpg", en: { cap: "Half Marathon" }, pt: { cap: "Meia Maratona" } },
+          { src: "assets/img/journey/running/porto-half-2.jpg", en: { cap: "" },              pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ── Other Races ── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Achievements · Running", pt: "Conquistas · Corrida" },
+      focus: { overview: true },
+      en: {
+        title:    "Other Races",
+        subtitle: "Always on the Move",
+        body:     "Trail runs, city races, and community events — every finish line counts, whatever the distance.",
+      },
+      pt: {
+        title:    "Outras Corridas",
+        subtitle: "Sempre em Movimento",
+        body:     "Trail runs, provas de cidade e eventos comunitários — cada linha de chegada conta, seja qual for a distância.",
+      },
+      media: {
+        type: "gallery",
+        cols: 2,
+        items: [
+          { src: "assets/img/journey/running/other-race-1.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/running/other-race-2.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/running/other-race-3.jpg", en: { cap: "" }, pt: { cap: "" } },
+          { src: "assets/img/journey/running/other-race-4.jpg", en: { cap: "" }, pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  AVIATION
+     * ────────────────────────────────────────────────────────────────────────── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Achievements", pt: "Conquistas" },
+      focus: { overview: true },
+      en: {
+        title:    "Aviation",
+        subtitle: "Freedom Above the Clouds",
+        body:     "Flying was never just a dream — it became a discipline. From aerobatic manoeuvres to low-level flybys.",
+      },
+      pt: {
+        title:    "Aviação",
+        subtitle: "Liberdade Acima das Nuvens",
+        body:     "Voar nunca foi apenas um sonho — tornou-se uma disciplina. De manobras acrobáticas a passagens rasantes.",
+      },
+      media: {
+        type: "gallery",
+        cols: 3,
+        items: [
+          { src: "assets/img/journey/aviation/maneuvers-video.mp4",       en: { cap: "Manoeuvres" },      pt: { cap: "Manobras" },         video: true },
+          { src: "assets/img/journey/aviation/flyover-video.mp4",         en: { cap: "Flyover" },          pt: { cap: "Sobrevoo" },          video: true },
+          { src: "assets/img/journey/aviation/aerobatic-display-video.mp4",en: { cap: "Aerobatic display" },pt: { cap: "Exibição acrobática" },video: true },
+          { src: "assets/img/journey/aviation/photo-1.jpg",               en: { cap: "" },                 pt: { cap: "" } },
+          { src: "assets/img/journey/aviation/photo-2.jpg",               en: { cap: "" },                 pt: { cap: "" } },
+          { src: "assets/img/journey/aviation/photo-3.jpg",               en: { cap: "" },                 pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  OTHER ACHIEVEMENTS
+     * ────────────────────────────────────────────────────────────────────────── */
+    {
+      layout: "media-text",
+      flag:   "PRT",
+      chapter: { en: "Achievements", pt: "Conquistas" },
+      focus: { overview: true },
+      en: {
+        title:    "Other Achievements",
+        subtitle: "Golf · Archery · Kart · Paintball",
+        body:     "Life is for trying everything — on the green, on the track, on the range, and in the field.",
+      },
+      pt: {
+        title:    "Outras Conquistas",
+        subtitle: "Golfe · Tiro com Arco · Kart · Paintball",
+        body:     "A vida é para experimentar tudo — no green, na pista, no estande e no campo.",
+      },
+      media: {
+        type: "gallery",
+        cols: 3,
+        items: [
+          { src: "assets/img/journey/other/golf-video.mp4",     en: { cap: "Golf" },     pt: { cap: "Golfe" },      video: true },
+          { src: "assets/img/journey/other/archery-video.mp4",  en: { cap: "Archery" },  pt: { cap: "Tiro com arco" },video: true },
+          { src: "assets/img/journey/other/kart-video.mp4",     en: { cap: "Kart" },     pt: { cap: "Kart" },       video: true },
+          { src: "assets/img/journey/other/paintball-video.mp4",en: { cap: "Paintball" },pt: { cap: "Paintball" },  video: true },
+          { src: "assets/img/journey/other/photo-1.jpg",        en: { cap: "" },         pt: { cap: "" } },
+          { src: "assets/img/journey/other/photo-2.jpg",        en: { cap: "" },         pt: { cap: "" } },
+        ],
+      },
+    },
+
+    /* ──────────────────────────────────────────────────────────────────────────
+     *  CLOSING SLIDES — globe rotating for all three
+     * ────────────────────────────────────────────────────────────────────────── */
+
+    /* ── The Journey Continues ── */
+    {
+      layout: "closing",
+      chapter: { en: "What's Next", pt: "O Que Vem A Seguir" },
+      focus: { overview: true },
+      en: {
+        title:    "The Journey Continues",
+        subtitle: "New destinations. New chapters.",
+        body:     "Every map has unexplored territory. Every horizon hides the next adventure.",
+      },
+      pt: {
+        title:    "A Jornada Continua",
+        subtitle: "Novos destinos. Novos capítulos.",
+        body:     "Cada mapa tem território por explorar. Cada horizonte esconde a próxima aventura.",
+      },
+    },
+
+    /* ── See You At The Next Destination ── */
+    {
+      layout: "closing",
+      chapter: { en: "Until Next Time", pt: "Até à Próxima" },
+      focus: { overview: true },
+      en: {
+        title:    "See You at the Next Destination",
+        subtitle: "The world is waiting.",
+        body:     "Until then — keep moving, keep exploring, keep living.",
+      },
+      pt: {
+        title:    "Até ao Próximo Destino",
+        subtitle: "O mundo está à espera.",
+        body:     "Até lá — continua a mover-te, a explorar, a viver.",
+      },
+    },
+
+    /* ── Thank You ── */
+    {
+      layout: "closing",
+      chapter: { en: "Thank You", pt: "Obrigado" },
+      focus: { overview: true },
+      en: {
+        title:    "Thank You",
+        subtitle: "For being part of this journey.",
+        body:     "Every person I've met along the way has shaped this story. Thank you for sharing it with me.",
+      },
+      pt: {
+        title:    "Obrigado",
+        subtitle: "Por fazeres parte desta jornada.",
+        body:     "Cada pessoa que encontrei no caminho moldou esta história. Obrigado por a partilhares comigo.",
+      },
+    },
+
+  ], // end slides
+}; // end JOURNEY_DATA
