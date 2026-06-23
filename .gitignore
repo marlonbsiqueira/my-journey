@@ -1,0 +1,11 @@
+# dependencies / build (none needed — this is a static site)
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+
+# local working files not needed on GitHub
+uploads/
+.thumbnail

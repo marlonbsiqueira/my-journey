@@ -1,0 +1,15 @@
+/* ============================================================================
+ *  MY JOURNEY — globe overlay helpers (cursor affordances + arrival flash).
+ * ========================================================================== */
+
+#globe-canvas.grab { cursor: grab; }
+#globe-canvas.grabbing { cursor: grabbing; }
+#globe-canvas.pointer { cursor: pointer; }
+
+/* cinematic flash on destination change */
+.flight-flash {
+  position: absolute; inset: 0; z-index: 7; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(92,200,255,0.22), transparent 60%);
+  opacity: 0; transition: opacity 0.65s var(--ease);
+}
+.flight-flash.fire { opacity: 1; transition: opacity 0.12s ease-out; }

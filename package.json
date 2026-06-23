@@ -1,0 +1,14 @@
+{
+  "name": "my-journey",
+  "version": "1.0.0",
+  "description": "My Journey — an interactive, bilingual (EN/PT) globe-based personal storytelling experience built with Three.js. Realistic rotating Earth, cinematic chapter fly-to transitions, no API keys, no build step.",
+  "type": "module",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": ["threejs", "globe", "earth", "storytelling", "portfolio", "presentation"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

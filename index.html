@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>My Journey — Marlon B. Siqueira</title>
+  <meta name="description" content="An interactive, globe-based personal storytelling experience — the journey of Marlon B. Siqueira, from Belo Horizonte to the world.">
+  <meta name="theme-color" content="#05080f">
+  <meta name="color-scheme" content="dark">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="My Journey — Marlon B. Siqueira">
+  <meta property="og:description" content="An interactive globe-based journey across continents — persistence, curiosity, and continuous growth.">
+  <meta property="og:image" content="public/images/og-preview.jpg">
+  <meta property="og:url" content="">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Apple -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <link rel="stylesheet" href="public/fonts/fonts.css">
+
+  <link rel="stylesheet" href="src/css/styles.css">
+  <link rel="stylesheet" href="src/css/globe.css">
+  <link rel="stylesheet" href="src/css/journey.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Rotating Earth backdrop -->
+    <canvas id="globe-canvas"></canvas>
+    <div class="starfield"></div>
+    <div class="flight-flash" id="flight-flash"></div>
+    <div id="scrim"></div>
+    <div class="vignette"></div>
+
+    <!-- Origin star marker (e.g. Belo Horizonte) -->
+    <div id="marker" aria-hidden="true"><span class="m-star"></span><span class="m-text"></span></div>
+
+    <!-- Top bar: brand + language toggle -->
+    <header id="bar">
+      <div class="bar-brand">
+        <span class="brand-mark"></span>
+        <span class="bar-name" id="bar-name">MARLON B. SIQUEIRA</span>
+      </div>
+      <div class="bar-spacer"></div>
+      <div class="sound-wrap" id="sound-wrap">
+        <button id="sound-btn" class="sound-btn" title="Sound" aria-label="Sound"></button>
+        <div class="sound-panel gone" id="sound-panel"></div>
+      </div>
+      <div class="lang" role="group" aria-label="Language">
+        <button id="lang-en" class="on">EN</button>
+        <button id="lang-pt">PT</button>
+      </div>
+    </header>
+
+    <!-- Slides (built from data by journey.js) -->
+    <main id="deck" aria-label="Journey slides"></main>
+
+    <!-- Bottom navigation -->
+    <nav id="nav" aria-label="Slide navigation">
+      <div id="dots" role="tablist" aria-label="Slides"></div>
+      <div class="nav-row">
+        <button class="nav-btn" id="prev-btn" aria-label="Previous"></button>
+        <span id="nav-count" aria-live="polite"></span>
+        <button class="nav-btn" id="next-btn" aria-label="Next"></button>
+      </div>
+    </nav>
+
+    <!-- Loading -->
+    <div id="loader" role="status" aria-label="Loading">
+      <div class="loader-ring"></div>
+      <div class="loader-text">Preparing your journey</div>
+      <div class="loader-bar"><i></i></div>
+    </div>
+  </div>
+
+  <!-- THREE + earcut (polygon triangulation for filled country highlights) -->
+  <script src="src/js/vendor/three.min.js"></script>
+  <script src="src/js/vendor/earcut.min.js"></script>
+  <script src="src/js/globe.js"></script>
+  <script src="src/js/audio.js"></script>
+  <script src="src/data/journey.js"></script>
+  <script src="src/js/journey.js"></script>
+</body>
+</html>

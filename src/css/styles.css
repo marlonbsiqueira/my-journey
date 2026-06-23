@@ -1,0 +1,162 @@
+/* ============================================================================
+ *  MY JOURNEY — core: design tokens, reset, base, buttons, loader, backdrop.
+ *  Slide system lives in journey.css.
+ * ========================================================================== */
+
+:root {
+  --bg:            #05080f;
+  --bg-2:          #070c16;
+  --panel:         rgba(10, 16, 28, 0.62);
+  --panel-strong:  rgba(8, 13, 23, 0.92);
+  --line:          rgba(255, 255, 255, 0.10);
+  --line-soft:     rgba(255, 255, 255, 0.06);
+  --text:          #eaf1fb;
+  --muted:         rgba(234, 241, 251, 0.62);
+  --muted-2:       rgba(234, 241, 251, 0.40);
+  --accent:        #5cc8ff;
+  --accent-soft:   rgba(92, 200, 255, 0.16);
+  --accent-line:   rgba(92, 200, 255, 0.45);
+  --hl:            #7df2a8;
+  --hl-line:       rgba(125, 242, 168, 0.5);
+  --shadow:        0 24px 60px -18px rgba(0, 0, 0, 0.7);
+  --r:             14px;
+  --r-sm:          10px;
+  --font-display:  "Space Grotesk", system-ui, sans-serif;
+  --font-body:     "Manrope", system-ui, sans-serif;
+  --ease:          cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#app { position: fixed; inset: 0; }
+
+/* ---- WebGL canvas + atmospheric overlays ------------------------------ */
+#globe-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+
+.vignette {
+  position: absolute; inset: 0; pointer-events: none; z-index: 6;
+  background:
+    radial-gradient(135% 135% at 50% 46%, transparent 68%, rgba(0,0,0,0.42) 100%);
+}
+.starfield {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.8;
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,0.80), transparent),
+    radial-gradient(1px 1px at 78% 14%, rgba(255,255,255,0.65), transparent),
+    radial-gradient(1px 1px at 34% 68%, rgba(255,255,255,0.60), transparent),
+    radial-gradient(1.5px 1.5px at 62% 82%, rgba(255,255,255,0.75), transparent),
+    radial-gradient(1px 1px at 88% 56%, rgba(255,255,255,0.55), transparent),
+    radial-gradient(1px 1px at 22% 88%, rgba(255,255,255,0.60), transparent),
+    radial-gradient(1px 1px at 50% 6%,  rgba(255,255,255,0.50), transparent),
+    radial-gradient(1px 1px at 6%  48%, rgba(255,255,255,0.45), transparent),
+    radial-gradient(1.5px 1.5px at 91% 30%, rgba(200,220,255,0.70), transparent),
+    radial-gradient(1px 1px at 42% 91%, rgba(255,255,255,0.55), transparent),
+    radial-gradient(1px 1px at 71% 44%, rgba(255,255,255,0.40), transparent),
+    radial-gradient(1px 1px at 17% 60%, rgba(255,255,255,0.45), transparent);
+}
+
+.hidden { opacity: 0 !important; pointer-events: none !important; }
+.gone   { display: none !important; }
+
+/* ---- buttons ---------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-body); font-weight: 600; font-size: 14px;
+  padding: 14px 26px; border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  color: var(--text); cursor: pointer;
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease),
+              box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+  white-space: nowrap; position: relative; overflow: hidden;
+  box-shadow: 0 4px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.btn::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: linear-gradient(135deg, rgba(92,200,255,0.14), rgba(125,242,168,0.06));
+  opacity: 0; transition: opacity 0.3s var(--ease); pointer-events: none;
+}
+.btn:hover {
+  border-color: rgba(92,200,255,0.42);
+  background: rgba(92,200,255,0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px -8px rgba(0,0,0,0.55), 0 0 0 1px rgba(92,200,255,0.18),
+              inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.btn:hover::after { opacity: 1; }
+.btn:active { transform: translateY(0); transition-duration: 0.1s; }
+.btn-primary {
+  background: linear-gradient(135deg, #5cc8ff 0%, #3aaeea 100%);
+  color: #03111e; border: 1px solid rgba(255,255,255,0.18);
+  font-weight: 700; align-self: flex-start;
+  box-shadow: 0 6px 20px -6px rgba(92,200,255,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.btn-primary::after {
+  background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  opacity: 1;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #80d8ff 0%, #5cc8ff 100%);
+  border-color: rgba(255,255,255,0.25);
+  box-shadow: 0 14px 34px -10px rgba(92,200,255,0.60), 0 0 0 1px rgba(255,255,255,0.15),
+              inset 0 1px 0 rgba(255,255,255,0.30);
+}
+.btn svg { width: 17px; height: 17px; }
+
+/* ---- brand mark ------------------------------------------------------- */
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1.5px solid var(--accent-line);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(92,200,255,0.5), transparent 60%),
+    conic-gradient(from 200deg, rgba(92,200,255,0.25), transparent 60%);
+  position: relative; flex: none;
+}
+.brand-mark::after {
+  content: ""; position: absolute; inset: 6px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2); border-top-color: var(--accent);
+}
+
+/* ---- loading screen --------------------------------------------------- */
+#loader {
+  position: absolute; inset: 0; z-index: 60;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 22px; background: radial-gradient(circle at 50% 45%, #0a1424, #03060d 75%);
+  transition: opacity 0.9s var(--ease);
+}
+.loader-ring {
+  width: 56px; height: 56px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.12); border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text {
+  font-family: var(--font-display); letter-spacing: 0.3em; font-size: 12px;
+  text-transform: uppercase; color: var(--muted);
+}
+.loader-bar { width: 220px; height: 2px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.loader-bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--hl)); transition: width 0.4s var(--ease); }
+
+/* ---- accessibility: visible focus rings -------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: inherit;
+}
+button:focus:not(:focus-visible) { outline: none; }
+
+/* ---- reduced motion ---------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
