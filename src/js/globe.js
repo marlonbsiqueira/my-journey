@@ -438,6 +438,14 @@
       while (az - this.cam.az > Math.PI) az -= Math.PI * 2;
       while (az - this.cam.az < -Math.PI) az += Math.PI * 2;
       const dist = (country.camDistance || 255) * this.zoomOut;   // keep the planet distant — global feel
+
+      // comet trail: from current camera target to new destination
+      const fromLat = 90 - this.cam.polar * (180 / Math.PI);
+      const fromLng = this.cam.az * (180 / Math.PI);
+      const toLat = country.coordinates[1];
+      const toLng  = country.coordinates[0];
+      this._spawnFlightTrail(fromLat, fromLng, toLat, toLng);
+
       this._tween = {
         t0: performance.now(), dur: 2800,
         from: { az: this.cam.az, polar: this.cam.polar, radius: this.cam.radius },
@@ -447,6 +455,75 @@
       };
       this.state = "flying";
       this._emit("flystart", country);
+    }
+
+    _spawnFlightTrail(fromLat, fromLng, toLat, toLng) {
+      if (this._flightTrail) { this.earthGroup.remove(this._flightTrail); this._flightTrail.geometry.dispose(); this._flightTrail.material.dispose(); this._flightTrail = null; }
+      const N = 96;
+      const R = EARTH_R * 1.012;
+      const p0 = latLngToVec3(fromLat, fromLng, 1).normalize();
+      const p1 = latLngToVec3(toLat, toLng, 1).normalize();
+      const positions = new Float32Array((N + 1) * 3);
+      const colors    = new Float32Array((N + 1) * 3);
+      for (let i = 0; i <= N; i++) {
+        const s = i / N;
+        // slerp along great circle
+        const dot = clamp(p0.dot(p1), -1, 1);
+        const theta = Math.acos(dot);
+        let pt;
+        if (theta < 0.0001) {
+          pt = p0.clone();
+        } else {
+          pt = p0.clone().multiplyScalar(Math.sin((1 - s) * theta) / Math.sin(theta))
+            .add(p1.clone().multiplyScalar(Math.sin(s * theta) / Math.sin(theta)));
+        }
+        pt.multiplyScalar(R);
+        positions[i * 3]     = pt.x;
+        positions[i * 3 + 1] = pt.y;
+        positions[i * 3 + 2] = pt.z;
+        // cyan head, dark tail — comet gradient
+        const bright = Math.pow(s, 1.8);
+        colors[i * 3]     = 0.22 + bright * 0.78;  // R
+        colors[i * 3 + 1] = 0.72 + bright * 0.28;  // G
+        colors[i * 3 + 2] = 1.0;                    // B
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute("color",    new THREE.BufferAttribute(colors, 3));
+      geo.setDrawRange(0, 1);
+      const mat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, depthWrite: false });
+      this._flightTrail = new THREE.Line(geo, mat);
+      this._flightTrailStart = performance.now();
+      this._flightTrailFade  = false;
+      this.earthGroup.add(this._flightTrail);
+    }
+
+    _updateFlightTrail(now) {
+      if (!this._flightTrail) return;
+      const elapsed = now - this._flightTrailStart;
+      const DUR = 2800;
+      if (!this._flightTrailFade) {
+        // grow the comet head from start to end over the flight duration
+        const t = clamp(elapsed / DUR, 0, 1);
+        const N = 96;
+        const head = Math.round(t * N) + 1;
+        // tail start: comet tail is ~30% of total length behind head
+        const tailLen = Math.max(1, Math.round(N * 0.32));
+        const tailStart = Math.max(0, head - tailLen);
+        this._flightTrail.geometry.setDrawRange(tailStart, head - tailStart);
+        if (t >= 1) { this._flightTrailFade = true; this._flightTrailFadeStart = now; }
+      } else {
+        // fade out after arrival
+        const FADE = 800;
+        const ft = clamp((now - this._flightTrailFadeStart) / FADE, 0, 1);
+        this._flightTrail.material.opacity = 0.9 * (1 - ft);
+        if (ft >= 1) {
+          this.earthGroup.remove(this._flightTrail);
+          this._flightTrail.geometry.dispose();
+          this._flightTrail.material.dispose();
+          this._flightTrail = null;
+        }
+      }
     }
 
     returnToOrbit() {
@@ -569,6 +646,7 @@
         this._emit("marker", { x: (p.x * 0.5 + 0.5) * W, y: (-p.y * 0.5 + 0.5) * H, front });
       }
 
+      this._updateFlightTrail(now);
       this._updateHover();
       this.renderer.render(this.scene, this.camera);
     }

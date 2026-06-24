@@ -827,13 +827,13 @@ window.JOURNEY_DATA = {
       id: "galo-pelo-mundo", layout: "story", chapter: "17", side: "right",
       focus: { overview: true },
       media: {
-        type: "gallery", cols: 3,
+        type: "gallery", cols: 2,
         items: [
-          { src: "images/galo1.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
-          { src: "images/galo2.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
-          { src: "images/galo3.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
-          { src: "images/galo4.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
-          { src: "images/galo5.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
+          { src: "images/galo1.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
+          { src: "images/galo2.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
+          { src: "images/galo3.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
+          { src: "images/galo4.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
+          { src: "images/galo5.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
         ],
       },
       en: {
