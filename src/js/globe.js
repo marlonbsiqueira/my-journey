@@ -439,12 +439,11 @@
       while (az - this.cam.az < -Math.PI) az += Math.PI * 2;
       const dist = (country.camDistance || 255) * this.zoomOut;   // keep the planet distant — global feel
 
-      // comet trail: from current camera target to new destination
-      const fromLat = 90 - this.cam.polar * (180 / Math.PI);
-      const fromLng = this.cam.az * (180 / Math.PI);
-      const toLat = country.coordinates[1];
-      const toLng  = country.coordinates[0];
-      this._spawnFlightTrail(fromLat, fromLng, toLat, toLng);
+      // comet trail: vector from camera's current look-at point to destination
+      const sp0 = Math.sin(this.cam.polar);
+      const fromVec = new THREE.Vector3(sp0 * Math.sin(this.cam.az), Math.cos(this.cam.polar), sp0 * Math.cos(this.cam.az));
+      const toVec = latLngToVec3(country.coordinates[1], country.coordinates[0], 1).normalize();
+      this._spawnFlightTrail(fromVec, toVec);
 
       this._tween = {
         t0: performance.now(), dur: 2800,
@@ -457,12 +456,12 @@
       this._emit("flystart", country);
     }
 
-    _spawnFlightTrail(fromLat, fromLng, toLat, toLng) {
+    _spawnFlightTrail(fromVec, toVec) {
       if (this._flightTrail) { this.earthGroup.remove(this._flightTrail); this._flightTrail.geometry.dispose(); this._flightTrail.material.dispose(); this._flightTrail = null; }
       const N = 96;
       const R = EARTH_R * 1.012;
-      const p0 = latLngToVec3(fromLat, fromLng, 1).normalize();
-      const p1 = latLngToVec3(toLat, toLng, 1).normalize();
+      const p0 = fromVec.clone().normalize();
+      const p1 = toVec.clone().normalize();
       const positions = new Float32Array((N + 1) * 3);
       const colors    = new Float32Array((N + 1) * 3);
       for (let i = 0; i <= N; i++) {
