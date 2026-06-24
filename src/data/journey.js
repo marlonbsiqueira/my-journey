@@ -821,6 +821,34 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
+     *  ATLETICO MINEIRO — Representando o Galo pelo Mundo
+     * ════════════════════════════════════════════════════════════════════════ */
+    {
+      id: "galo-pelo-mundo", layout: "story", chapter: "17", side: "right",
+      focus: { overview: true },
+      media: {
+        type: "gallery", cols: 3,
+        items: [
+          { src: "images/galo1.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
+          { src: "images/galo2.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
+          { src: "images/galo3.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
+          { src: "images/galo4.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
+          { src: "images/galo5.jpg", en: { cap: "Atletico Mineiro" }, pt: { cap: "Atlético Mineiro" } },
+        ],
+      },
+      en: {
+        kicker: "The Club",
+        title: "Representing Galo Around the World",
+        body: "Wherever I go, I carry the black and white of Atletico Mineiro. The Galo is not just a football club — it's an identity, a pride rooted in Belo Horizonte that follows me across every continent.",
+      },
+      pt: {
+        kicker: "O Clube",
+        title: "Representando o Galo pelo Mundo",
+        body: "Onde quer que eu vá, carrego o preto e branco do Atlético Mineiro. O Galo não é apenas um clube de futebol — é uma identidade, um orgulho enraizado em Belo Horizonte que me acompanha por todos os continentes.",
+      },
+    },
+
+    /* ════════════════════════════════════════════════════════════════════════
      *  25 · ACHIEVEMENTS — Aviation
      * ════════════════════════════════════════════════════════════════════════ */
     {

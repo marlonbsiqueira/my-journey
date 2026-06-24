@@ -379,6 +379,7 @@
     l.style.opacity = "0"; setTimeout(() => l.classList.add("gone"), 900);
   }
   globe.on("ready", () => setTimeout(hideLoader, 250));
+  globe.on("arrive", () => { if (window.JourneyAudio) window.JourneyAudio.ping(); });
   setTimeout(hideLoader, 9000);
 
   renderAll();
