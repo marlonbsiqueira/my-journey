@@ -456,71 +456,131 @@
       this._emit("flystart", country);
     }
 
+    _makeCometTexture() {
+      const cv = document.createElement("canvas"); cv.width = cv.height = 64;
+      const cx = cv.getContext("2d");
+      const g = cx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0,    "rgba(255,255,255,1)");
+      g.addColorStop(0.18, "rgba(180,240,255,1)");
+      g.addColorStop(0.45, "rgba(80,180,255,0.6)");
+      g.addColorStop(1,    "rgba(0,80,200,0)");
+      cx.fillStyle = g; cx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(cv);
+    }
+
     _spawnFlightTrail(fromVec, toVec) {
-      if (this._flightTrail) { this.earthGroup.remove(this._flightTrail); this._flightTrail.geometry.dispose(); this._flightTrail.material.dispose(); this._flightTrail = null; }
-      const N = 96;
-      const R = EARTH_R * 1.012;
+      // cleanup previous
+      if (this._flightGroup) {
+        this._flightGroup.children.slice().forEach(c => { c.geometry.dispose(); c.material.dispose(); });
+        this.earthGroup.remove(this._flightGroup);
+        this._flightGroup = null;
+      }
+
+      const N = 80;        // arc segments
+      const TAIL = 28;     // visible tail length in segments
+      const R = EARTH_R * 1.016;
+
+      // precompute all arc points via slerp
       const p0 = fromVec.clone().normalize();
       const p1 = toVec.clone().normalize();
-      const positions = new Float32Array((N + 1) * 3);
-      const colors    = new Float32Array((N + 1) * 3);
+      const dot = clamp(p0.dot(p1), -1, 1);
+      const arcAngle = Math.acos(dot);
+      const arcPts = [];
       for (let i = 0; i <= N; i++) {
         const s = i / N;
-        // slerp along great circle
-        const dot = clamp(p0.dot(p1), -1, 1);
-        const theta = Math.acos(dot);
         let pt;
-        if (theta < 0.0001) {
+        if (arcAngle < 0.0001) {
           pt = p0.clone();
         } else {
-          pt = p0.clone().multiplyScalar(Math.sin((1 - s) * theta) / Math.sin(theta))
-            .add(p1.clone().multiplyScalar(Math.sin(s * theta) / Math.sin(theta)));
+          pt = p0.clone().multiplyScalar(Math.sin((1 - s) * arcAngle) / Math.sin(arcAngle))
+            .add(p1.clone().multiplyScalar(Math.sin(s * arcAngle) / Math.sin(arcAngle)));
         }
-        pt.multiplyScalar(R);
-        positions[i * 3]     = pt.x;
-        positions[i * 3 + 1] = pt.y;
-        positions[i * 3 + 2] = pt.z;
-        // cyan head, dark tail — comet gradient
-        const bright = Math.pow(s, 1.8);
-        colors[i * 3]     = 0.22 + bright * 0.78;  // R
-        colors[i * 3 + 1] = 0.72 + bright * 0.28;  // G
-        colors[i * 3 + 2] = 1.0;                    // B
+        arcPts.push(pt.normalize().multiplyScalar(R));
       }
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-      geo.setAttribute("color",    new THREE.BufferAttribute(colors, 3));
-      geo.setDrawRange(0, 1);
-      const mat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, depthWrite: false });
-      this._flightTrail = new THREE.Line(geo, mat);
+
+      // line layer (thin bright arc backbone)
+      const linePositions = new Float32Array((N + 1) * 3);
+      const lineColors    = new Float32Array((N + 1) * 3);
+      arcPts.forEach((pt, i) => {
+        linePositions[i * 3] = pt.x; linePositions[i * 3 + 1] = pt.y; linePositions[i * 3 + 2] = pt.z;
+        const b = i / N;
+        lineColors[i * 3] = 0.5 + b * 0.5; lineColors[i * 3 + 1] = 0.85; lineColors[i * 3 + 2] = 1.0;
+      });
+      const lineGeo = new THREE.BufferGeometry();
+      lineGeo.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
+      lineGeo.setAttribute("color",    new THREE.BufferAttribute(lineColors, 3));
+      lineGeo.setDrawRange(0, 0);
+      const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.7, depthWrite: false, blending: THREE.AdditiveBlending });
+      const line = new THREE.Line(lineGeo, lineMat);
+
+      // glow points layer (sprite dots along arc for comet thickness)
+      const tex = this._makeCometTexture();
+      const ptPositions = new Float32Array((TAIL + 1) * 3);
+      const ptColors    = new Float32Array((TAIL + 1) * 3);
+      const ptGeo = new THREE.BufferGeometry();
+      ptGeo.setAttribute("position", new THREE.BufferAttribute(ptPositions, 3).setUsage(THREE.DynamicDrawUsage));
+      ptGeo.setAttribute("color",    new THREE.BufferAttribute(ptColors,    3).setUsage(THREE.DynamicDrawUsage));
+      ptGeo.setDrawRange(0, 0);
+      const ptMat = new THREE.PointsMaterial({
+        map: tex, size: 5.5, vertexColors: true, transparent: true, opacity: 0.95,
+        depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+      });
+      const pts = new THREE.Points(ptGeo, ptMat);
+
+      const group = new THREE.Group();
+      group.add(line); group.add(pts);
+      this.earthGroup.add(group);
+
+      this._flightGroup     = group;
+      this._flightArcPts    = arcPts;
+      this._flightN         = N;
+      this._flightTail      = TAIL;
       this._flightTrailStart = performance.now();
       this._flightTrailFade  = false;
-      this.earthGroup.add(this._flightTrail);
     }
 
     _updateFlightTrail(now) {
-      if (!this._flightTrail) return;
+      if (!this._flightGroup) return;
       const elapsed = now - this._flightTrailStart;
-      const DUR = 2800;
+      const DUR = 2800, FADE = 700;
+      const arcPts = this._flightArcPts;
+      const N = this._flightN, TAIL = this._flightTail;
+      const line = this._flightGroup.children[0];
+      const pts  = this._flightGroup.children[1];
+
       if (!this._flightTrailFade) {
-        // grow the comet head from start to end over the flight duration
         const t = clamp(elapsed / DUR, 0, 1);
-        const N = 96;
-        const head = Math.round(t * N) + 1;
-        // tail start: comet tail is ~30% of total length behind head
-        const tailLen = Math.max(1, Math.round(N * 0.32));
-        const tailStart = Math.max(0, head - tailLen);
-        this._flightTrail.geometry.setDrawRange(tailStart, head - tailStart);
+        const head = Math.round(t * N);
+        const tailStart = Math.max(0, head - TAIL);
+
+        // update line draw range
+        line.geometry.setDrawRange(tailStart, head - tailStart + 1);
+
+        // update glow points — rebuild active tail segment positions
+        const count = head - tailStart + 1;
+        const pos = pts.geometry.attributes.position.array;
+        const col = pts.geometry.attributes.color.array;
+        for (let j = 0; j < count; j++) {
+          const idx = tailStart + j;
+          pos[j * 3] = arcPts[idx].x; pos[j * 3 + 1] = arcPts[idx].y; pos[j * 3 + 2] = arcPts[idx].z;
+          // head = bright white-cyan, tail = dim blue
+          const frac = j / Math.max(1, count - 1);
+          col[j * 3] = 0.3 + frac * 0.7; col[j * 3 + 1] = 0.7 + frac * 0.3; col[j * 3 + 2] = 1.0;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        pts.geometry.attributes.color.needsUpdate = true;
+        pts.geometry.setDrawRange(0, count);
+
         if (t >= 1) { this._flightTrailFade = true; this._flightTrailFadeStart = now; }
       } else {
-        // fade out after arrival
-        const FADE = 800;
         const ft = clamp((now - this._flightTrailFadeStart) / FADE, 0, 1);
-        this._flightTrail.material.opacity = 0.9 * (1 - ft);
+        const op = 1 - ft;
+        line.material.opacity = 0.7 * op;
+        pts.material.opacity  = 0.95 * op;
         if (ft >= 1) {
-          this.earthGroup.remove(this._flightTrail);
-          this._flightTrail.geometry.dispose();
-          this._flightTrail.material.dispose();
-          this._flightTrail = null;
+          this._flightGroup.children.slice().forEach(c => { c.geometry.dispose(); c.material.dispose(); });
+          this.earthGroup.remove(this._flightGroup);
+          this._flightGroup = null;
         }
       }
     }
