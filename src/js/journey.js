@@ -107,7 +107,7 @@
           v.setAttribute("data-journey-video", "1");
           // belt-and-suspenders: if a browser ignores the loop attribute, restart on end
           v.addEventListener("ended", () => { try { v.currentTime = 0; v.play(); } catch (e) {} });
-          v.onloadeddata = () => { clear(); syncVideos(); }; box.appendChild(v);
+          v.onloadeddata = () => { URL.revokeObjectURL(url); clear(); syncVideos(); }; box.appendChild(v);
         } else {
           const img = new Image();
           img.src = url;
@@ -228,8 +228,8 @@
   // autoplay the active slide's videos (muted, so browsers allow it); pause the rest
   function syncVideos() {
     if (!slideEls || !slideEls.length) return;
-    slideEls.forEach((el, i) => {
-      el.querySelectorAll('video[data-journey-video]').forEach(v => {
+    slideEls.forEach((slideEl, i) => {
+      slideEl.querySelectorAll('video[data-journey-video]').forEach(v => {
         if (i === index) { v.muted = true; const p = v.play(); if (p && p.catch) p.catch(() => {}); }
         else { try { v.pause(); v.currentTime = 0; } catch (e) {} }
       });
@@ -448,7 +448,6 @@
     document.addEventListener("click", e => { if (open && !wrap.contains(e.target)) setOpen(false); });
 
     A.onMuteChange(m => { btn.classList.toggle("muted", m); });
-    A.onStyleChange(() => {});
 
     // Start the soundscape on the first interaction anywhere (autoplay policy).
     function kick() {

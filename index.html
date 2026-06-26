@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="html-root">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -13,13 +13,14 @@
   <meta property="og:title" content="My Journey — Marlon B. Siqueira">
   <meta property="og:description" content="An interactive globe-based journey across continents — persistence, curiosity, and continuous growth.">
   <meta property="og:image" content="public/images/og-preview.jpg">
-  <meta property="og:url" content="">
+  <meta property="og:url" content="https://marlonbsiqueira.github.io/my-journey/">
   <meta name="twitter:card" content="summary_large_image">
 
   <!-- Apple -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+  <script>document.getElementById('html-root').lang = localStorage.getItem('journey-lang') || 'en';</script>
   <link rel="stylesheet" href="public/fonts/fonts.css">
 
   <link rel="stylesheet" href="src/css/styles.css">
