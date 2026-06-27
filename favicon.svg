@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="16" fill="#1a2540"/>
+  <!-- Accent ring -->
+  <circle cx="16" cy="16" r="14.5" fill="none" stroke="#5cc8ff" stroke-width="1.2"/>
+  <!-- MBS text -->
+  <text x="16" y="20.5"
+        font-family="'Syne', 'Arial Black', Arial, sans-serif"
+        font-size="10"
+        font-weight="800"
+        fill="#5cc8ff"
+        text-anchor="middle"
+        letter-spacing="0.5">MBS</text>
+</svg>
