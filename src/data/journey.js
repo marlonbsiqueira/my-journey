@@ -365,9 +365,7 @@ window.JOURNEY_DATA = {
         type: "gallery", cols: 2,
         items: [
           { src: "images/scotland1.jpg", en: { cap: "Edinburgh Castle" }, pt: { cap: "Castelo de Edimburgo" } },
-          { src: "images/scotland2.jpg", en: { cap: "The Royal Mile" },   pt: { cap: "Royal Mile" } },
-          { src: "images/scotland3.jpg", en: { cap: "" },                 pt: { cap: "" } },
-          { src: "images/scotland4.jpg", en: { cap: "" },                 pt: { cap: "" } },
+          { src: "images/scotland2.jpg", en: { cap: "" },                 pt: { cap: "" } },
         ],
       },
       experiences: {
@@ -390,8 +388,6 @@ window.JOURNEY_DATA = {
         items: [
           { src: "images/wales1.jpg", en: { cap: "Holyhead" }, pt: { cap: "Holyhead" } },
           { src: "images/wales2.jpg", en: { cap: "Holyhead" }, pt: { cap: "Holyhead" } },
-          { src: "images/wales3.jpg", en: { cap: "" },         pt: { cap: "" } },
-          { src: "images/wales4.jpg", en: { cap: "" },         pt: { cap: "" } },
         ],
       },
       experiences: {
@@ -416,8 +412,7 @@ window.JOURNEY_DATA = {
           { src: "images/ireland2.jpg", en: { cap: "Malahide Castle" },  pt: { cap: "Castelo de Malahide" } },
           { src: "images/ireland3.jpg", en: { cap: "Temple Bar, Dublin" },pt: { cap: "Temple Bar, Dublin" } },
           { src: "images/ireland4.jpg", en: { cap: "Dublin city" },      pt: { cap: "Cidade de Dublin" } },
-          { src: "images/ireland5.jpg", en: { cap: "" },                 pt: { cap: "" } },
-          { src: "images/ireland6.jpg", en: { cap: "" },                 pt: { cap: "" } },
+          { src: "images/ireland5.jpg", en: { cap: "" }, pt: { cap: "" } },
         ],
       },
       experiences: {
@@ -464,7 +459,7 @@ window.JOURNEY_DATA = {
       media: {
         type: "gallery", cols: 2,
         items: [
-          { src: "images/italy4.jpg",         en: { cap: "Shroud of Turin" },  pt: { cap: "Sudário de Turim" } },
+          { src: "images/italy4.jpg",         en: { cap: "Turin Cathedral" },  pt: { cap: "Catedral de Torino" } },
           { src: "images/turin2.jpg",          en: { cap: "" },                pt: { cap: "" } },
           { src: "images/turin3.jpg",          en: { cap: "" },                pt: { cap: "" } },
           { src: "images/italy_paraglider.mp4", video: true, en: { cap: "Paragliding · Turin" }, pt: { cap: "Parapente · Turim" } },
@@ -493,7 +488,7 @@ window.JOURNEY_DATA = {
           { src: "images/france4.jpg",         en: { cap: "Notre-Dame" },        pt: { cap: "Notre-Dame" } },
           { src: "images/paris-arc.jpg",       en: { cap: "Arc de Triomphe" },   pt: { cap: "Arco do Triunfo" } },
           { src: "images/paris-winged-victory.jpg", en: { cap: "Winged Victory of Samothrace · Louvre" }, pt: { cap: "Vitória de Samotrácia · Louvre" } },
-          { src: "images/paris-montmartre.jpg",en: { cap: "Montmartre" },        pt: { cap: "Montmartre" } },
+          { src: "images/paris-montmartre.jpg",en: { cap: "Mona Lisa" },          pt: { cap: "Mona Lisa" } },
         ],
       },
       experiences: {
@@ -515,9 +510,7 @@ window.JOURNEY_DATA = {
         type: "gallery", cols: 2,
         items: [
           { src: "images/france2.jpg",           en: { cap: "Palace of Versailles" },  pt: { cap: "Palácio de Versalhes" } },
-          { src: "images/versailles-mirrors.jpg", en: { cap: "Hall of Mirrors" },       pt: { cap: "Galeria dos Espelhos" } },
           { src: "images/versailles-gardens.jpg", en: { cap: "Gardens" },               pt: { cap: "Jardins" } },
-          { src: "images/versailles4.jpg",        en: { cap: "" },                      pt: { cap: "" } },
         ],
       },
       experiences: {
@@ -709,7 +702,7 @@ window.JOURNEY_DATA = {
         items: [
           { src: "images/portugal4.jpg",              en: { cap: "Lisbon" },                     pt: { cap: "Lisboa" } },
           { src: "images/lisboa-castelo-sao-jorge.jpg", en: { cap: "Castelo de São Jorge" },  pt: { cap: "Castelo de São Jorge" } },
-          { src: "images/lisboa-alfama.jpg",          en: { cap: "Alfama & 25 de Abril Bridge" },pt: { cap: "Alfama e Ponte 25 de Abril" } },
+          { src: "images/lisboa-alfama.jpg",          en: { cap: "" }, pt: { cap: "" } },
         ],
       },
       experiences: {
@@ -802,6 +795,7 @@ window.JOURNEY_DATA = {
           { src: "images/sports.jpg",        en: { cap: "Road races" },   pt: { cap: "Provas de rua" } },
           { src: "images/achv1.jpg",         en: { cap: "Road races" },   pt: { cap: "Provas de rua" } },
           { src: "images/running-other.jpg", en: { cap: "Trail run" },     pt: { cap: "Trail run" } },
+          { src: "images/other-races4.jpg",  en: { cap: "" },              pt: { cap: "" } },
         ],
       },
       experiences: {
@@ -834,7 +828,7 @@ window.JOURNEY_DATA = {
           { src: "images/aviation-display.mp4", video: true, en: { cap: "Aerobatic display" },     pt: { cap: "Exibição acrobática" } },
           { src: "images/aviation1.jpg",                     en: { cap: "" },                      pt: { cap: "" } },
           { src: "images/aviation2.jpg",                     en: { cap: "" },                      pt: { cap: "" } },
-          { src: "images/aviation3.jpg",                     en: { cap: "" },                      pt: { cap: "" } },
+          { src: "images/aviation4.mp4", video: true,        en: { cap: "" },                      pt: { cap: "" } },
         ],
       },
       experiences: {
@@ -900,6 +894,8 @@ window.JOURNEY_DATA = {
           { src: "images/galo3.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
           { src: "images/galo4.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
           { src: "images/galo5.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
+          { src: "images/galo6.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
+          { src: "images/galo7.jpg", en: { cap: "Atletico Mineiro · The Galo" }, pt: { cap: "Atlético Mineiro · O Galo" } },
         ],
       },
       en: {

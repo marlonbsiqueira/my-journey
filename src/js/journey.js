@@ -268,7 +268,12 @@
     if (!focus) return;
     setMarker(focus);
     if (focus.overview) { globe.clearHighlight(); globe.returnToOrbit(); return; }
-    globe.flyTo({ coordinates: focus.coordinates, camDistance: focus.dist || 255 });
+    if (silent) {
+      // snap instantly — no fly animation (used on first load)
+      globe.snapTo({ coordinates: focus.coordinates, camDistance: focus.dist || 255 });
+    } else {
+      globe.flyTo({ coordinates: focus.coordinates, camDistance: focus.dist || 255 });
+    }
     globe.clearHighlight();
     if (focus.match) {
       const feat = featureFor(focus.match);
@@ -312,22 +317,36 @@
   }
 
   let busy = false;
+  function activateSlide() {
+    slideEls[index].classList.add("active");
+    const inner = slideEls[index].querySelector(".col-text"); if (inner) inner.scrollTop = 0;
+    syncChrome(); updateScrim(); syncVideos();
+    busy = false;
+  }
   function go(i) {
     if (i < 0 || i >= SLIDES.length || i === index || busy) return;
     busy = true;
+    const prevIndex = index;
     const prev = slideEls[index];
     index = i;
     localStorage.setItem("journey-index", String(index));
     prev.classList.remove("active");
-    if (window.JourneyAudio) window.JourneyAudio.whoosh();   // travel sound on every passage
+    if (window.JourneyAudio) window.JourneyAudio.whoosh();
     triggerFlash();
-    applyFocus(SLIDES[index].focus);
-    setTimeout(() => {
-      slideEls[index].classList.add("active");
-      const inner = slideEls[index].querySelector(".col-text"); if (inner) inner.scrollTop = 0;
-      syncChrome(); updateScrim(); syncVideos();
-      busy = false;
-    }, 300);
+    const focus = SLIDES[index].focus;
+    const prevFocus = SLIDES[prevIndex].focus;
+    const fromOverview = !prevFocus || prevFocus.overview;
+    if (focus && !focus.overview && fromOverview) {
+      // vindo de overview → snap directo sem animação de voo
+      applyFocus(focus, true);
+      setTimeout(activateSlide, 500);
+    } else if (!focus || focus.overview) {
+      applyFocus(focus);
+      setTimeout(activateSlide, 400);
+    } else {
+      applyFocus(focus);
+      setTimeout(activateSlide, 3000); // aguarda o globo chegar
+    }
   }
   function next() { go(index + 1); }
   function prev() { go(index - 1); }

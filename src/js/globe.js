@@ -78,8 +78,8 @@
       this._disposed = false;
 
       // camera pose in spherical coords around origin (zoomed OUT for a global feel)
-      this.cam = { az: -0.6, polar: 1.12, radius: 460 };
-      this.idle = { polar: 1.12, radius: 460 }; // resting pose
+      this.cam = { az: 0.80, polar: 1.22, radius: 460 }; // starts facing Belo Horizonte
+      this.idle = { polar: 1.22, radius: 460 }; // resting pose
       this.state = "idle";                       // idle | flying | focused | returning
       this.manualPauseUntil = 0;
 
@@ -431,6 +431,18 @@
     }
 
     /* ---- camera control -------------------------------------------------- */
+    snapTo(country) {
+      const target = latLngToPose(country.coordinates[1], country.coordinates[0]);
+      const dist = (country.camDistance || 255) * this.zoomOut;
+      this._tween = null;
+      this.cam.az = target.az;
+      this.cam.polar = clamp(target.polar, 0.46, Math.PI - 0.46);
+      this.cam.radius = dist;
+      this.state = "focused";
+      this._applyCam();
+      this._emit("arrive", country);
+    }
+
     flyTo(country) {
       const target = latLngToPose(country.coordinates[1], country.coordinates[0]);
       // unwrap azimuth to nearest equivalent angle (shortest path)
@@ -666,8 +678,8 @@
         this.cam.polar = lerp(tw.from.polar, tw.to.polar, e);
         this.cam.radius = lerp(tw.from.radius, tw.to.radius, e) + tw.arc * Math.sin(Math.PI * t);
         if (t >= 1) { this._tween = null; tw.onDone && tw.onDone(); }
-      } else if (this.autoRotate && now > this.manualPauseUntil) {
-        // gentle, continuous rotation in every state — keeps the global-journey feel
+      } else if (this.autoRotate && this.state === "idle" && now > this.manualPauseUntil) {
+        // rotate only when in overview (idle) — stops when focused on a city
         this.cam.az += this.rotateSpeed * dt;
       }
       this._applyCam();
