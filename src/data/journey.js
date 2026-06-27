@@ -97,12 +97,12 @@ window.JOURNEY_DATA = {
       en: {
         kicker: "Career · From Brazil to the World",
         title: "A global professional impact",
-        body: "From humble beginnings in retail and sales to multinational organizations and global automation — with recruitment processes at PwC, Deloitte and McKinsey & Company along the way.",
+        body: "A career built across multinational organizations and global automation — with selection processes at multinationals and Big4s along the way.",
       },
       pt: {
         kicker: "Carreira · Do Brasil para o Mundo",
         title: "Um impacto profissional global",
-        body: "De começos humildes no varejo e vendas até organizações multinacionais e automação global — com processos seletivos na PwC, Deloitte e McKinsey & Company pelo caminho.",
+        body: "Uma carreira construída em organizações multinacionais e automação global — com processos seletivos em multinacionais e Big4s pelo caminho.",
       },
     },
 
@@ -118,7 +118,7 @@ window.JOURNEY_DATA = {
           { src: "images/edu1.jpg", en: { cap: "First School" }, pt: { cap: "Primeira escola" } },
           { src: "images/edu2.jpg", en: { cap: "Primary School" }, pt: { cap: "Escola primária" } },
           { src: "images/edu3.jpg", en: { cap: "Bachelor's — Business Administration" }, pt: { cap: "Bacharelado — Administração" } },
-          { src: "images/edu4.jpg", en: { cap: "Postgraduate — Finance & Taxation · London" }, pt: { cap: "Pós-Graduação — Finanças e Tributação · Londres" } },
+          { src: "images/edu4.jpg", en: { cap: "Postgraduate — Finance & Taxation · Portugal" }, pt: { cap: "Pós-Graduação — Finanças e Tributação · Portugal" } },
         ],
       },
       en: {
@@ -495,8 +495,8 @@ window.JOURNEY_DATA = {
         en: ["Eiffel Tower", "The Louvre", "Notre-Dame", "Arc de Triomphe", "Champs-Élysées", "Montmartre & Sacré-Cœur"],
         pt: ["Torre Eiffel", "Louvre", "Notre-Dame", "Arco do Triunfo", "Champs-Élysées", "Montmartre e Sacré-Cœur"],
       },
-      en: { kicker: "France · Paris", title: "La Ville Lumière", body: "The Eiffel Tower at golden hour, the Louvre's endless corridors, Notre-Dame, the Arc de Triomphe and the charm of Montmartre — Paris in full." },
-      pt: { kicker: "França · Paris", title: "La Ville Lumière", body: "A Torre Eiffel na hora dourada, os corredores infinitos do Louvre, Notre-Dame, o Arco do Triunfo e o charme de Montmartre — Paris por inteiro." },
+      en: { kicker: "France · Paris", title: "La Ville Lumière", body: "The Eiffel Tower at golden hour, the Louvre's endless corridors, Notre-Dame and the Arc de Triomphe — Paris in full." },
+      pt: { kicker: "França · Paris", title: "La Ville Lumière", body: "A Torre Eiffel na hora dourada, os corredores infinitos do Louvre, Notre-Dame e o Arco do Triunfo — Paris por inteiro." },
     },
 
     /* ════════════════════════════════════════════════════════════════════════
