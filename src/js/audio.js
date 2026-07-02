@@ -198,6 +198,7 @@
   }
 
   function whoosh() {
+    if (muted) return;
     if (!ensureContext()) return;
     if (ctx.state === "suspended") { ctx.resume().then(_doWhoosh).catch(() => {}); return; }
     _doWhoosh();
@@ -248,6 +249,7 @@
 
   /* ── Arrival ping (soft bell) ─────────────────────────────────────────── */
   function ping() {
+    if (muted) return;
     if (!ensureContext()) return;
     if (ctx.state === "suspended") { ctx.resume().then(_doPing).catch(() => {}); return; }
     _doPing();

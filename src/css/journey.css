@@ -343,9 +343,16 @@
 #scrim[data-mode="right"]  { background: linear-gradient(270deg, rgba(3,6,13,0.82) 0%, rgba(3,6,13,0.4) 34%, transparent 60%); }
 #scrim[data-mode="center"] { background: radial-gradient(120% 90% at 50% 55%, rgba(3,6,13,0.7), transparent 70%); }
 
-/* ----- splash: primeiro ecrã só com o planeta ------------------------- */
-.slide[data-layout="splash"] .col-text { display: none; }
+/* ----- splash: planeta + boas-vindas e CTA centrados ------------------- */
+/* o inner deixa o arrasto do globo passar; só o texto captura o rato */
 .slide[data-layout="splash"] .slide-inner { pointer-events: none; }
+.slide[data-layout="splash"] .col-text {
+  pointer-events: auto; max-width: 720px; text-align: center;
+}
+.slide[data-layout="splash"] .s-title { font-size: clamp(38px, 6vw, 76px); }
+.slide[data-layout="splash"] .s-kicker { justify-content: center; }
+.slide[data-layout="splash"] .s-body { margin-left: auto; margin-right: auto; }
+.slide[data-layout="splash"] .btn-primary { align-self: center; }
 
 /* ----- top bar mobile adjustments ------------------------------------- */
 @media (max-width: 500px) {
@@ -377,6 +384,8 @@
   #scrim[data-mode="left"], #scrim[data-mode="right"] {
     background: linear-gradient(180deg, rgba(3,6,13,0.55) 0%, rgba(3,6,13,0.90) 100%);
   }
+  /* keep the focus star under the stacked slide content on small screens */
+  #marker { z-index: 8; }
   .nav-btn { width: 54px; height: 54px; }
   #dots { gap: 5px; max-width: calc(100vw - 140px); overflow: hidden; }
   #dots .dot { width: 6px; height: 6px; }

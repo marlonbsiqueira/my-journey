@@ -30,8 +30,9 @@
     day:    "public/images/earth-blue-marble.jpg",
     night:  "public/images/earth-night.jpg",
     water:  "public/images/earth-water.png",
-    bump:   "public/images/earth-topology.png",
-    clouds: "public/images/fair_clouds_4k.png",
+    // cloud coverage as a luminance-on-black JPEG used as alphaMap (white
+    // clouds) — ~260 KB vs 4.8 MB for the old RGBA PNG
+    clouds: "public/images/fair_clouds_2k.jpg",
   };
 
   const SUN_DIR = new THREE.Vector3(1.0, 0.32, 0.55).normalize();
@@ -162,7 +163,7 @@
       const dayT = get(TEX.day, true);
       const nightT = get(TEX.night, true);
       const waterT = get(TEX.water, false);
-      const cloudT = get(TEX.clouds, true);
+      const cloudT = get(TEX.clouds, false); // alpha data, not colour — keep linear
 
       this._buildEarth(dayT, nightT, waterT);
       this._buildClouds(cloudT);
@@ -238,7 +239,7 @@
 
     _buildClouds(cloudT) {
       const mat = new THREE.MeshStandardMaterial({
-        map: cloudT, transparent: true, opacity: 0.42, depthWrite: false,
+        color: 0xffffff, alphaMap: cloudT, transparent: true, opacity: 0.42, depthWrite: false,
         roughness: 1, metalness: 0,
       });
       this.clouds = new THREE.Mesh(new THREE.SphereGeometry(CLOUD_R, 72, 72), mat);

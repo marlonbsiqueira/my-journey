@@ -29,8 +29,11 @@
 
   /* ---------------------------------------------------------------- state */
   let lang = localStorage.getItem("journey-lang") || "en";
-  let index = parseInt(localStorage.getItem("journey-index") || "0", 10);
-  if (isNaN(index) || index < 0 || index >= SLIDES.length) index = 0;
+  let index = 0; // a jornada recomeça sempre do início
+
+  // honour the user's reduced-motion preference: no auto-rotate, no fly
+  // animations, no whoosh/flash on slide change
+  const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   const t = (obj) => (obj && (obj[lang] != null ? obj[lang] : obj.en)) || "";
 
@@ -40,7 +43,7 @@
   const globe = new window.Globe({
     canvas: $("#globe-canvas"),
     accent: S.accent, highlightColor: S.highlight,
-    autoRotate: S.autoRotate, rotateSpeed: S.rotateSpeed,
+    autoRotate: REDUCED ? false : S.autoRotate, rotateSpeed: S.rotateSpeed,
     onProgress: pct => { const b = $("#loader .loader-bar > i"); if (b) b.style.width = Math.round(pct * 100) + "%"; },
   });
 
@@ -52,7 +55,7 @@
   }
   fetch(NE + "ne_110m_admin_0_countries.geojson").then(r => r.json())
     .then(gj => globe.setGlobalBorders(gj)).catch(() => {});
-  fetch(NE + "ne_50m_admin_0_map_subunits.geojson").then(r => r.json()).then(gj => {
+  fetch(NE + "ne_visited_subunits.geojson").then(r => r.json()).then(gj => {
     gj.features.forEach(f => {
       const k = f.properties && f.properties.SUBUNIT, g = f.geometry; if (!k || !g) return;
       const b = subunitIndex[k] || (subunitIndex[k] = []);
@@ -87,43 +90,58 @@
   }
 
   /* ------------------------------------------------------ media helpers */
+  // Media elements are created with data-src only; hydrateMedia() assigns the
+  // real src when the slide (or a neighbour) becomes active. The browser then
+  // streams natively — no upfront fetch of the whole deck, videos can range-
+  // stream, and switching language re-renders without re-downloading anything.
   function placeholder(cls, src, label, opts) {
     opts = opts || {};
     const box = el("div", "ph " + cls);
     if (opts.icon) box.appendChild(el("div", "ph-icon", ICON.video));
     if (label) box.appendChild(el("div", "ph-tag", label));
     const clear = () => { const tg = box.querySelector(".ph-tag"); tg && tg.remove(); const ic = box.querySelector(".ph-icon"); ic && ic.remove(); };
-    fetch(src, { cache: "force-cache" })
-      .then(r => (r.ok ? r.blob() : null))
-      .then(blob => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        if (opts.video) {
-          const v = document.createElement("video");
-          v.src = url; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "metadata"; v.controls = !!opts.controls;
-          v.setAttribute("loop", "");
-          v.setAttribute("muted", "");
-          v.setAttribute("playsinline", "");
-          v.setAttribute("data-journey-video", "1");
-          // belt-and-suspenders: if a browser ignores the loop attribute, restart on end
-          v.addEventListener("ended", () => { try { v.currentTime = 0; v.play(); } catch (e) {} });
-          v.onloadeddata = () => { URL.revokeObjectURL(url); clear(); syncVideos(); }; box.appendChild(v);
-        } else {
-          const img = new Image();
-          img.src = url;
-          img.alt = label || "";
-          img.onload = () => { URL.revokeObjectURL(url); clear(); };
-          box.appendChild(img);
-        }
-      })
-      .catch(() => {});
+    if (opts.video) {
+      const v = document.createElement("video");
+      v.muted = true; v.loop = true; v.playsInline = true; v.preload = "metadata"; v.controls = !!opts.controls;
+      v.setAttribute("loop", "");
+      v.setAttribute("muted", "");
+      v.setAttribute("playsinline", "");
+      v.setAttribute("data-journey-video", "1");
+      v.dataset.src = src;
+      // belt-and-suspenders: if a browser ignores the loop attribute, restart on end
+      v.addEventListener("ended", () => { try { v.currentTime = 0; v.play(); } catch (e) {} });
+      v.addEventListener("loadeddata", () => { clear(); syncVideos(); });
+      v.addEventListener("error", () => v.remove());
+      box.appendChild(v);
+    } else {
+      const img = new Image();
+      img.decoding = "async";
+      img.alt = opts.alt || "";
+      img.dataset.src = src;
+      img.onload = clear;
+      img.onerror = () => img.remove();
+      box.appendChild(img);
+    }
     return box;
+  }
+
+  // assign real src to media on the slide i and its direct neighbours
+  function hydrateMedia(i) {
+    if (!slideEls.length) return;
+    for (let k = Math.max(0, i - 1); k <= Math.min(SLIDES.length - 1, i + 1); k++) {
+      slideEls[k].querySelectorAll("img[data-src], video[data-src]").forEach(m => {
+        m.src = m.dataset.src;
+        m.removeAttribute("data-src");
+      });
+    }
   }
 
   function galleryItem(it, square) {
     const card = el("div", "g-card");
-    card.appendChild(placeholder("g-media" + (square ? " sq" : ""), it.src, it.src, { video: it.video, icon: it.video, controls: it.video }));
-    const cap = t(it); if (cap && cap.cap) card.appendChild(el("div", "g-cap", cap.cap));
+    const cap = t(it);
+    card.appendChild(placeholder("g-media" + (square ? " sq" : ""), it.src, it.src,
+      { video: it.video, icon: it.video, controls: it.video, alt: (cap && cap.cap) || "" }));
+    if (cap && cap.cap) card.appendChild(el("div", "g-cap", cap.cap));
     return card;
   }
 
@@ -242,6 +260,7 @@
     deck.innerHTML = "";
     slideEls = SLIDES.map((s, i) => { const e = buildSlide(s, i); deck.appendChild(e); return e; });
     slideEls[index].classList.add("active");
+    hydrateMedia(index);
     buildDots();
     syncChrome();
     syncVideos();
@@ -284,8 +303,7 @@
   function updateScrim() {
     const s = SLIDES[index];
     const scrim = $("#scrim");
-    scrim.dataset.mode = s.layout === "splash" ? "none"
-      : (s.layout === "closing" || s.layout === "thanks") ? "center"
+    scrim.dataset.mode = (s.layout === "splash" || s.layout === "closing" || s.layout === "thanks") ? "center"
       : (slideEls[index].dataset.side === "left" ? "right" : "left");
   }
 
@@ -329,14 +347,20 @@
     const prevIndex = index;
     const prev = slideEls[index];
     index = i;
-    localStorage.setItem("journey-index", String(index));
     prev.classList.remove("active");
-    if (window.JourneyAudio) window.JourneyAudio.whoosh();
-    triggerFlash();
+    hydrateMedia(index); // começa a baixar a mídia enquanto o globo voa
+    if (!REDUCED) {
+      if (window.JourneyAudio) window.JourneyAudio.whoosh();
+      triggerFlash();
+    }
     const focus = SLIDES[index].focus;
     const prevFocus = SLIDES[prevIndex].focus;
     const fromOverview = !prevFocus || prevFocus.overview;
-    if (focus && !focus.overview && fromOverview) {
+    if (REDUCED) {
+      // sem animação de voo: snap directo e slide entra logo
+      applyFocus(focus, true);
+      setTimeout(activateSlide, 150);
+    } else if (focus && !focus.overview && fromOverview) {
       // vindo de overview → snap directo sem animação de voo
       applyFocus(focus, true);
       setTimeout(activateSlide, 500);
@@ -345,7 +369,7 @@
       setTimeout(activateSlide, 400);
     } else {
       applyFocus(focus);
-      setTimeout(activateSlide, 3000); // aguarda o globo chegar
+      setTimeout(activateSlide, 2200); // o texto entra enquanto o voo termina
     }
   }
   function next() { go(index + 1); }
