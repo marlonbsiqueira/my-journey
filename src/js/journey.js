@@ -303,7 +303,8 @@
   function updateScrim() {
     const s = SLIDES[index];
     const scrim = $("#scrim");
-    scrim.dataset.mode = (s.layout === "splash" || s.layout === "closing" || s.layout === "thanks") ? "center"
+    scrim.dataset.mode = s.layout === "splash" ? "none"
+      : (s.layout === "closing" || s.layout === "thanks") ? "center"
       : (slideEls[index].dataset.side === "left" ? "right" : "left");
   }
 

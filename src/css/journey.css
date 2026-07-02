@@ -343,16 +343,9 @@
 #scrim[data-mode="right"]  { background: linear-gradient(270deg, rgba(3,6,13,0.82) 0%, rgba(3,6,13,0.4) 34%, transparent 60%); }
 #scrim[data-mode="center"] { background: radial-gradient(120% 90% at 50% 55%, rgba(3,6,13,0.7), transparent 70%); }
 
-/* ----- splash: planeta + boas-vindas e CTA centrados ------------------- */
-/* o inner deixa o arrasto do globo passar; só o texto captura o rato */
+/* ----- splash: primeiro ecrã só com o planeta (modo apresentação) ------ */
+.slide[data-layout="splash"] .col-text { display: none; }
 .slide[data-layout="splash"] .slide-inner { pointer-events: none; }
-.slide[data-layout="splash"] .col-text {
-  pointer-events: auto; max-width: 720px; text-align: center;
-}
-.slide[data-layout="splash"] .s-title { font-size: clamp(38px, 6vw, 76px); }
-.slide[data-layout="splash"] .s-kicker { justify-content: center; }
-.slide[data-layout="splash"] .s-body { margin-left: auto; margin-right: auto; }
-.slide[data-layout="splash"] .btn-primary { align-self: center; }
 
 /* ----- top bar mobile adjustments ------------------------------------- */
 @media (max-width: 500px) {

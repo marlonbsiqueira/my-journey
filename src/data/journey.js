@@ -72,10 +72,37 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  3 · CAREER
+     *  3 · EDUCATION
      * ════════════════════════════════════════════════════════════════════════ */
     {
-      id: "career", layout: "story", chapter: "02", side: "right",
+      id: "education", layout: "story", chapter: "02", side: "right",
+      focus: { overview: true },
+      media: {
+        type: "gallery", cols: 2,
+        items: [
+          { src: "images/edu1.jpg", en: { cap: "First School" }, pt: { cap: "Primeira escola" } },
+          { src: "images/edu2.jpg", en: { cap: "Primary School" }, pt: { cap: "Escola primária" } },
+          { src: "images/edu3.jpg", en: { cap: "Bachelor's — Business Administration" }, pt: { cap: "Bacharelado — Administração" } },
+          { src: "images/edu4.jpg", en: { cap: "Postgraduate — Finance & Taxation · Portugal" }, pt: { cap: "Pós-Graduação — Finanças e Tributação · Portugal" } },
+        ],
+      },
+      en: {
+        kicker: "Education · Brazil & Portugal",
+        title: "A commitment to lifelong learning",
+        body: "A Bachelor's Degree in Business Administration, later expanded with a Postgraduate Degree in Finance and Taxation in Portugal — a continuous desire to broaden my understanding of business, finance and global markets.",
+      },
+      pt: {
+        kicker: "Formação · Brasil e Portugal",
+        title: "Um compromisso com o aprendizado contínuo",
+        body: "Bacharelado em Administração de Empresas, ampliado com uma Pós-Graduação em Finanças e Tributação em Portugal — o desejo contínuo de ampliar meu conhecimento em negócios, finanças e mercados globais.",
+      },
+    },
+
+    /* ════════════════════════════════════════════════════════════════════════
+     *  4 · CAREER
+     * ════════════════════════════════════════════════════════════════════════ */
+    {
+      id: "career", layout: "story", chapter: "03", side: "right",
       focus: { overview: true },
       media: {
         type: "logos",
@@ -103,33 +130,6 @@ window.JOURNEY_DATA = {
         kicker: "Carreira · Do Brasil para o Mundo",
         title: "Um impacto profissional global",
         body: "Uma carreira construída em organizações multinacionais e automação global — com processos seletivos em multinacionais e Big4s pelo caminho.",
-      },
-    },
-
-    /* ════════════════════════════════════════════════════════════════════════
-     *  4 · EDUCATION
-     * ════════════════════════════════════════════════════════════════════════ */
-    {
-      id: "education", layout: "story", chapter: "03", side: "right",
-      focus: { overview: true },
-      media: {
-        type: "gallery", cols: 2,
-        items: [
-          { src: "images/edu1.jpg", en: { cap: "First School" }, pt: { cap: "Primeira escola" } },
-          { src: "images/edu2.jpg", en: { cap: "Primary School" }, pt: { cap: "Escola primária" } },
-          { src: "images/edu3.jpg", en: { cap: "Bachelor's — Business Administration" }, pt: { cap: "Bacharelado — Administração" } },
-          { src: "images/edu4.jpg", en: { cap: "Postgraduate — Finance & Taxation · Portugal" }, pt: { cap: "Pós-Graduação — Finanças e Tributação · Portugal" } },
-        ],
-      },
-      en: {
-        kicker: "Education · Brazil & Portugal",
-        title: "A commitment to lifelong learning",
-        body: "A Bachelor's Degree in Business Administration, later expanded with a Postgraduate Degree in Finance and Taxation in Portugal — a continuous desire to broaden my understanding of business, finance and global markets.",
-      },
-      pt: {
-        kicker: "Formação · Brasil e Portugal",
-        title: "Um compromisso com o aprendizado contínuo",
-        body: "Bacharelado em Administração de Empresas, ampliado com uma Pós-Graduação em Finanças e Tributação em Portugal — o desejo contínuo de ampliar meu conhecimento em negócios, finanças e mercados globais.",
       },
     },
 
