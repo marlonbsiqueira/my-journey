@@ -935,7 +935,6 @@ window.JOURNEY_DATA = {
       id: "thanks", layout: "thanks", chapter: "",
       focus: { overview: true },
       contact: [
-        { type: "email",    label: "Email",    value: "your.email@example.com",       href: "mailto:your.email@example.com" },
         { type: "linkedin", label: "LinkedIn", value: "linkedin.com/in/your-profile", href: "https://linkedin.com/in/your-profile" },
       ],
       en: {
