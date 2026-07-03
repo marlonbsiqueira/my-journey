@@ -197,8 +197,9 @@
     return whooshOut;
   }
 
+  // whoosh/ping saem por um canal próprio (fora do master): o mute do painel
+  // vale só para a música — os efeitos de viagem tocam sempre (intencional)
   function whoosh() {
-    if (muted) return;
     if (!ensureContext()) return;
     if (ctx.state === "suspended") { ctx.resume().then(_doWhoosh).catch(() => {}); return; }
     _doWhoosh();
@@ -249,7 +250,6 @@
 
   /* ── Arrival ping (soft bell) ─────────────────────────────────────────── */
   function ping() {
-    if (muted) return;
     if (!ensureContext()) return;
     if (ctx.state === "suspended") { ctx.resume().then(_doPing).catch(() => {}); return; }
     _doPing();
