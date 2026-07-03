@@ -290,7 +290,7 @@
   bottom: max(clamp(18px, 3vh, 30px), env(safe-area-inset-bottom, 0px));
   left: 50%; transform: translateX(-50%);
   z-index: 28; display: flex; flex-direction: column; align-items: center; gap: 12px;
-  width: min(640px, calc(100vw - 48px));
+  width: min(940px, calc(100vw - 48px));
 }
 .nav-row { display: flex; align-items: center; gap: 14px; }
 .nav-btn {
@@ -330,12 +330,30 @@
 }
 #nav-count b { color: var(--text); font-weight: 600; }
 
-/* progress dots */
-#dots { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center; max-width: 100%; }
-.dot { width: 9px; height: 9px; border-radius: 50%; border: none; padding: 0; cursor: pointer; background: rgba(255,255,255,0.18); transition: all 0.3s var(--ease); }
-.dot:hover { background: rgba(255,255,255,0.4); transform: scale(1.2); }
-.dot.done { background: var(--accent-line); }
-.dot.on { background: var(--accent); width: 26px; border-radius: 5px; }
+/* progress icons: temáticos (play/pessoa/chapéu/mala/…) + bandeiras.
+   Futuros: acinzentados e apagados · visitados: coloridos · atual: maior,
+   com brilho e um ponto indicador por baixo. */
+#dots { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 100%; }
+.dot {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 23px; height: 20px; padding: 0; border: none; background: transparent; cursor: pointer;
+  filter: grayscale(1) brightness(0.9); opacity: 0.35;
+  transition: filter 0.3s var(--ease), opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.dot img { width: 21px; height: 15px; object-fit: cover; border-radius: 3px; display: block; box-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+.dot svg { width: 16px; height: 16px; color: var(--accent); display: block; }
+.dot .dot-plain { width: 8px; height: 8px; border-radius: 50%; background: #fff; display: block; }
+.dot:hover { opacity: 0.8; transform: translateY(-1px); }
+.dot.done { filter: none; opacity: 0.8; }
+.dot.on {
+  filter: drop-shadow(0 0 5px rgba(92,200,255,0.55));
+  opacity: 1; transform: scale(1.35); z-index: 1;
+}
+.dot.on::after {
+  content: ""; position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 6px var(--accent);
+}
 
 /* ----- legibility scrim (behind the text side) ------------------------- */
 #scrim { position: absolute; inset: 0; z-index: 11; pointer-events: none; transition: background 0.7s var(--ease); }
@@ -380,9 +398,11 @@
   /* keep the focus star under the stacked slide content on small screens */
   #marker { z-index: 8; }
   .nav-btn { width: 54px; height: 54px; }
-  #dots { gap: 5px; max-width: calc(100vw - 140px); overflow: hidden; }
-  #dots .dot { width: 6px; height: 6px; }
-  #dots .dot.on { width: 18px; }
+  #dots { gap: 2px; max-width: calc(100vw - 24px); }
+  #dots .dot { width: 17px; height: 15px; }
+  #dots .dot img { width: 15px; height: 11px; border-radius: 2px; }
+  #dots .dot svg { width: 12px; height: 12px; }
+  #dots .dot.on { transform: scale(1.3); }
   .stat-banner { padding: 12px 16px; }
   .stat-banner .sb-v { font-size: clamp(28px, 7vw, 42px); }
   .logo-card { padding: 10px; gap: 10px; }
