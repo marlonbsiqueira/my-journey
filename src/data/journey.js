@@ -935,7 +935,7 @@ window.JOURNEY_DATA = {
       id: "thanks", layout: "thanks", chapter: "",
       focus: { overview: true },
       contact: [
-        { type: "linkedin", label: "LinkedIn", value: "linkedin.com/in/your-profile", href: "https://linkedin.com/in/your-profile" },
+        { type: "linkedin", label: "LinkedIn", value: "linkedin.com/in/marlonbsiqueira", href: "https://www.linkedin.com/in/marlonbsiqueira/" },
       ],
       en: {
         kicker: "See you at the next destination",
