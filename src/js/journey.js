@@ -344,7 +344,15 @@
 
     inner.appendChild(text);
     const media = renderMedia(s.media);
-    if (media) { media.classList.add("col-media", "anim"); inner.appendChild(media); }
+    if (media) {
+      media.classList.add("col-media", "anim");
+      // photos without a caption still need a name for screen readers
+      media.querySelectorAll(".g-card").forEach((c, k) => {
+        if (!c.hasAttribute("aria-label"))
+          c.setAttribute("aria-label", `${L.title || L.kicker || ""} · ${t(DATA.ui.photo)} ${k + 1}`);
+      });
+      inner.appendChild(media);
+    }
 
     slide.appendChild(inner);
     return slide;
