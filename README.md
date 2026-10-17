@@ -27,14 +27,19 @@ Open `index.html` and travel.
   side, text on the other, alternating per chapter so the screen always feels
   full and balanced.
 - **Slideshow navigation** — Previous / Next, a chapter counter, clickable
-  progress dots, full keyboard (`←` `→` `Home` `End`) and touch-swipe. Position
-  is remembered on reload.
-- **17 chapters** — Welcome · Who I Am · Career · Education · Brazil · United
+  progress dots, full keyboard (`←` `→` `Home` `End`) and touch-swipe. Every
+  chapter has its own shareable link (e.g. `…/my-journey/#rio`).
+- **33 slides** — Welcome · Who I Am · Career · Education · Brazil · United
   States · England · Italy · Ireland · Northern Ireland · France · Germany ·
   Spain · Portugal · Achievements · Reflection · Thank You. Each country is its
   own destination, with its **flag**, highlighted territory and experiences.
-- **Media-ready** — every image / video slot is a labelled placeholder that
-  swaps to your real file the moment you add it.
+- **Media-ready** — every image / video slot shows your real file the moment
+  you add it.
+- **Photo mosaics & full-screen viewer** — each chapter's photos fill a large
+  panel as a mosaic with a featured first photo and captions on the image;
+  clicking any photo or video opens it full screen (← → / swipe to browse,
+  Esc to close). Photos fade out for the flight and rise in once the globe
+  arrives.
 - **Responsive** — adapts from widescreen presentations to mobile.
 
 ---
@@ -58,7 +63,9 @@ Then open the printed URL.
 Drop your files into **`public/images/`** — wait, the slots point at
 **`images/…`**, so create an **`images/`** folder next to `index.html` (or change
 the paths in `src/data/journey.js`). Use these exact names and they appear
-automatically — until then a labelled placeholder is shown:
+automatically. Open the site with **`?debug`** (e.g. `…/my-journey/?debug#rio`)
+to see every empty slot labelled with the file name it expects. The table below
+lists the main ones; `src/data/journey.js` has the complete list (~148 files):
 
 | Slot | File(s) |
 | --- | --- |
@@ -77,8 +84,9 @@ automatically — until then a labelled placeholder is shown:
 | Portugal | `images/portugal1.jpg`, `images/portugal2.jpg` |
 | Achievements | `images/sports.jpg`, `images/achv1.jpg`, `images/achv2.jpg` |
 
-> Every image/video slot is a labelled placeholder until you add the file —
-> just drop a file with the matching name and it appears automatically. Update
+> Just drop a file with the matching name into `images/` and it appears
+> automatically. Keep photos under ~300 KB (JPG/WebP, ~1600 px wide) and videos
+> short and compressed (MP4 H.264, ~720p) — GitHub rejects files over 100 MB. Update
 > your email & LinkedIn in the final slide's `contact` block in
 > `src/data/journey.js`.
 
@@ -154,3 +162,15 @@ download them into `public/assets/` and update the URLs in `src/js/globe.js` and
 
 ## License
 MIT.
+
+---
+
+## 🧭 URL options
+
+| URL | Effect |
+| --- | --- |
+| `…/my-journey/#paris` | opens directly on a chapter (any slide `id`) |
+| `…/my-journey/?debug` | shows every media slot with the file name it expects |
+
+The site also works without WebGL (static backdrop instead of the 3D globe) and
+without JavaScript (a short summary with a link to the portfolio).

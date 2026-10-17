@@ -16,6 +16,9 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:url" content="https://marlonbsiqueira.github.io/my-journey/">
+  <meta property="og:site_name" content="My Journey — Marlon B. Siqueira">
+  <meta property="og:image:alt" content="A 3D globe with the countries of Marlon B. Siqueira's journey highlighted">
+  <meta name="author" content="Marlon B. Siqueira">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="My Journey — Marlon B. Siqueira">
   <meta name="twitter:description" content="An interactive globe-based journey across continents — persistence, curiosity, and continuous growth.">
@@ -26,7 +29,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <script>document.getElementById('html-root').lang = localStorage.getItem('journey-lang') || 'en';</script>
+  <script>
+    // set the language before first paint; localStorage can throw in private modes
+    try { document.documentElement.lang = localStorage.getItem('journey-lang') || 'en'; } catch (e) {}
+  </script>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="public/fonts/fonts.css">
 
@@ -54,12 +60,12 @@
       </div>
       <div class="bar-spacer"></div>
       <div class="sound-wrap" id="sound-wrap">
-        <button id="sound-btn" class="sound-btn" title="Sound" aria-label="Sound"></button>
+        <button type="button" id="sound-btn" class="sound-btn" title="Sound" aria-label="Sound" aria-expanded="false"></button>
         <div class="sound-panel gone" id="sound-panel"></div>
       </div>
       <div class="lang" role="group" aria-label="Language">
-        <button id="lang-en" class="on">EN</button>
-        <button id="lang-pt">PT</button>
+        <button type="button" id="lang-en" class="on" aria-pressed="true" lang="en">EN</button>
+        <button type="button" id="lang-pt" aria-pressed="false" lang="pt">PT</button>
       </div>
     </header>
 
@@ -70,11 +76,20 @@
     <nav id="nav" aria-label="Slide navigation">
       <div id="dots" role="tablist" aria-label="Slides"></div>
       <div class="nav-row">
-        <button class="nav-btn" id="prev-btn" aria-label="Previous"></button>
+        <button type="button" class="nav-btn" id="prev-btn" aria-label="Previous"></button>
         <span id="nav-count" aria-live="polite"></span>
-        <button class="nav-btn" id="next-btn" aria-label="Next"></button>
+        <button type="button" class="nav-btn" id="next-btn" aria-label="Next"></button>
       </div>
     </nav>
+
+    <noscript>
+      <div class="noscript">
+        <h1>My Journey — Marlon B. Siqueira</h1>
+        <p>This interactive journey needs JavaScript. From Belo Horizonte to the world — Brazil, the United States, the UK, Ireland, Italy, France, Germany, Spain and Portugal.</p>
+        <p><a href="https://marlonbsiqueira.github.io/marlonbsiqueira/">Visit my portfolio</a></p>
+      </div>
+      <style>#loader { display: none; }</style>
+    </noscript>
 
     <!-- Loading -->
     <div id="loader" role="status" aria-label="Loading">

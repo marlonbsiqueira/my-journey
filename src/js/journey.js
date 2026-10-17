@@ -17,6 +17,13 @@
   const $ = sel => document.querySelector(sel);
   const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
   const flagUrl = (code) => `public/flags/${code}.png`;
+  // localStorage throws in some privacy modes — never let that break the app
+  const store = {
+    get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+  };
+  // ?debug shows the expected file name on media slots that have no file yet
+  const DEBUG = /[?&]debug\b/.test(location.search);
 
   const ICON = {
     prev: '<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="62,20 30,50 62,80" stroke="#5cc8ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 6px #5cc8ff)"/><polyline points="62,20 30,50 62,80" stroke="#e8f8ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -47,8 +54,10 @@
   DOT_ICON["other-races"] = DOT_ICON.marathon;
 
   /* ---------------------------------------------------------------- state */
-  let lang = localStorage.getItem("journey-lang") || "en";
-  let index = 0; // a jornada recomeça sempre do início
+  let lang = store.get("journey-lang") || "en";
+  // start at the chapter named in the URL hash (#rio), otherwise at the beginning
+  const hashIndex = () => SLIDES.findIndex(s => "#" + s.id === location.hash);
+  let index = Math.max(0, hashIndex());
 
   // honour the user's reduced-motion preference: no auto-rotate, no fly
   // animations, no whoosh/flash on slide change
@@ -59,12 +68,31 @@
   /* --------------------------------------------------- globe + borders */
   document.documentElement.style.setProperty("--accent", S.accent || "#5cc8ff");
   document.documentElement.style.setProperty("--hl", S.highlight || "#7df2a8");
-  const globe = new window.Globe({
-    canvas: $("#globe-canvas"),
-    accent: S.accent, highlightColor: S.highlight,
-    autoRotate: REDUCED ? false : S.autoRotate, rotateSpeed: S.rotateSpeed,
-    onProgress: pct => { const b = $("#loader .loader-bar > i"); if (b) b.style.width = Math.round(pct * 100) + "%"; },
-  });
+  // Without WebGL (old devices, disabled GPU) the story still works: a no-op
+  // globe stands in and a static backdrop is shown instead of the 3D Earth.
+  function stubGlobe() {
+    const handlers = {};
+    const noop = () => {};
+    const g = {
+      on: (evt, cb) => { (handlers[evt] = handlers[evt] || []).push(cb); return g; },
+      setGlobalBorders: noop, setVisitedCountries: noop, highlight: noop, clearHighlight: noop,
+      setMarker: noop, snapTo: noop, flyTo: noop, returnToOrbit: noop,
+    };
+    document.documentElement.classList.add("no-webgl");
+    setTimeout(() => (handlers.ready || []).forEach(cb => cb()), 0);
+    return g;
+  }
+  let globe;
+  try {
+    globe = new window.Globe({
+      canvas: $("#globe-canvas"),
+      accent: S.accent, highlightColor: S.highlight,
+      autoRotate: REDUCED ? false : S.autoRotate, rotateSpeed: S.rotateSpeed,
+      onProgress: pct => { const b = $("#loader .loader-bar > i"); if (b) b.style.width = Math.round(pct * 100) + "%"; },
+    });
+  } catch (e) {
+    globe = stubGlobe();
+  }
 
   let subunitIndex = {};
   function featureFor(match) {
@@ -94,8 +122,7 @@
   const markerEl = $("#marker");
   globe.on("marker", p => {
     if (!p) { markerEl.classList.remove("show"); return; }
-    markerEl.style.left = p.x + "px";
-    markerEl.style.top = p.y + "px";
+    markerEl.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
     markerEl.classList.toggle("show", !!p.front);
   });
   function setMarker(focus) {
@@ -117,7 +144,7 @@
     opts = opts || {};
     const box = el("div", "ph " + cls);
     if (opts.icon) box.appendChild(el("div", "ph-icon", ICON.video));
-    if (label) box.appendChild(el("div", "ph-tag", label));
+    if (label && DEBUG) box.appendChild(el("div", "ph-tag", label));
     const clear = () => { const tg = box.querySelector(".ph-tag"); tg && tg.remove(); const ic = box.querySelector(".ph-icon"); ic && ic.remove(); };
     if (opts.video) {
       const v = document.createElement("video");
@@ -155,13 +182,28 @@
     }
   }
 
-  function galleryItem(it, square) {
+  // Gallery card: media with the caption laid over it. Clicking (or Enter /
+  // Space) opens the lightbox; --i staggers the entrance animation.
+  function galleryItem(it, i) {
     const card = el("div", "g-card");
     const cap = t(it);
-    card.appendChild(placeholder("g-media" + (square ? " sq" : ""), it.src, it.src,
-      { video: it.video, icon: it.video, controls: it.video, alt: (cap && cap.cap) || "" }));
+    card.style.setProperty("--i", i);
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.dataset.src = it.src;
+    if (it.video) card.dataset.video = "1";
+    if (cap && cap.cap) { card.dataset.cap = cap.cap; card.setAttribute("aria-label", cap.cap); }
+    card.appendChild(placeholder("g-media", it.src, it.src,
+      { video: it.video, icon: it.video, alt: (cap && cap.cap) || "" }));
     if (cap && cap.cap) card.appendChild(el("div", "g-cap", cap.cap));
     return card;
+  }
+  // grid sized by item count (layouts in journey.css: [data-count])
+  function galleryGrid(items) {
+    const grid = el("div", "g-grid");
+    grid.dataset.count = items.length;
+    items.forEach((it, i) => grid.appendChild(galleryItem(it, i)));
+    return grid;
   }
 
   function renderMedia(m) {
@@ -169,7 +211,13 @@
     switch (m.type) {
       case "image": {
         const wrap = el("div", "m-single");
-        wrap.appendChild(placeholder("single-img", m.src, m.label));
+        const card = el("div", "g-card single-card");
+        card.style.setProperty("--i", 0);
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.dataset.src = m.src;
+        card.appendChild(placeholder("single-img", m.src, m.label));
+        wrap.appendChild(card);
         return wrap;
       }
       case "logos": {
@@ -183,9 +231,8 @@
         });
         container.appendChild(wrap);
         if (m.photos && m.photos.length) {
-          const photoGrid = el("div", "g-grid career-photos");
-          photoGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
-          m.photos.forEach(it => photoGrid.appendChild(galleryItem(it)));
+          const photoGrid = galleryGrid(m.photos);
+          photoGrid.classList.add("career-photos");
           container.appendChild(photoGrid);
         }
         return container;
@@ -196,10 +243,7 @@
           wrap.appendChild(el("div", "stat-banner",
             `<span class="sb-v">${m.stat.value}</span><span class="sb-u">${m.stat.unit}</span><span class="sb-l">${t(m.stat)}</span>`));
         }
-        const grid = el("div", "g-grid");
-        grid.style.gridTemplateColumns = `repeat(${m.cols || 2}, 1fr)`;
-        m.items.forEach(it => grid.appendChild(galleryItem(it)));
-        wrap.appendChild(grid);
+        wrap.appendChild(galleryGrid(m.items));
         return wrap;
       }
       default: return null;
@@ -296,10 +340,9 @@
       else if (s.flag) d.innerHTML = `<img src="${flagUrl(s.flag)}" alt="" draggable="false">`;
       else d.appendChild(el("span", "dot-plain"));
       const label = t(s).title || ("Slide " + (i + 1));
+      d.type = "button";
       d.title = label;
-      d.setAttribute("role", "tab");
       d.setAttribute("aria-label", label);
-      d.setAttribute("aria-selected", i === index ? "true" : "false");
       d.onclick = () => go(i);
       dotsWrap.appendChild(d);
     });
@@ -335,12 +378,16 @@
     [...dotsWrap.children].forEach((d, i) => {
       d.classList.toggle("on", i === index);
       d.classList.toggle("done", i < index);
-      d.setAttribute("aria-selected", i === index ? "true" : "false");
+      if (i === index) d.setAttribute("aria-current", "step"); else d.removeAttribute("aria-current");
     });
+    // keep the current icon in view when the row scrolls (small screens)
+    const cur = dotsWrap.children[index];
+    if (cur && dotsWrap.scrollWidth > dotsWrap.clientWidth) {
+      dotsWrap.scrollTo({ left: cur.offsetLeft - dotsWrap.clientWidth / 2 + cur.offsetWidth / 2, behavior: REDUCED ? "auto" : "smooth" });
+    }
     const countEl = $("#nav-count");
     countEl.innerHTML = `<b>${String(index + 1).padStart(2, "0")}</b> ${t(DATA.ui.of)} ${String(SLIDES.length).padStart(2, "0")}`;
-    countEl.setAttribute("aria-live", "polite");
-    countEl.setAttribute("aria-label", `${t(DATA.ui.chapter)} ${index + 1} ${t(DATA.ui.of)} ${SLIDES.length}`);
+    countEl.setAttribute("aria-label", `${index + 1} ${t(DATA.ui.of)} ${SLIDES.length}: ${t(SLIDES[index]).title || ""}`);
     const prevBtn = $("#prev-btn"), nextBtn = $("#next-btn");
     prevBtn.disabled = index === 0;
     nextBtn.disabled = index === SLIDES.length - 1;
@@ -359,18 +406,28 @@
   }
 
   let busy = false;
+  let pending = null; // last target requested while a transition was running
   function activateSlide() {
     slideEls[index].classList.add("active");
     const inner = slideEls[index].querySelector(".col-text"); if (inner) inner.scrollTop = 0;
     syncChrome(); updateScrim(); syncVideos();
     busy = false;
+    if (pending != null) { const p = pending; pending = null; go(p); }
+  }
+  // keep the URL pointing at the current chapter so it can be shared (…/#rio)
+  function setHash() {
+    try {
+      history.replaceState(null, "", index === 0 ? location.pathname + location.search : "#" + SLIDES[index].id);
+    } catch (e) {}
   }
   function go(i) {
-    if (i < 0 || i >= SLIDES.length || i === index || busy) return;
+    if (i < 0 || i >= SLIDES.length || i === index) return;
+    if (busy) { pending = i; return; }
     busy = true;
     const prevIndex = index;
     const prev = slideEls[index];
     index = i;
+    setHash();
     prev.classList.remove("active");
     hydrateMedia(index); // começa a baixar a mídia enquanto o globo voa
     if (!REDUCED) {
@@ -396,28 +453,35 @@
       setTimeout(activateSlide, 2200); // o texto entra enquanto o voo termina
     }
   }
-  function next() { go(index + 1); }
-  function prev() { go(index - 1); }
+  // while busy, step relative to the queued target so repeated presses add up
+  function next() { go((pending != null ? pending : index) + 1); }
+  function prev() { go((pending != null ? pending : index) - 1); }
+  window.addEventListener("hashchange", () => { const h = hashIndex(); if (h >= 0) go(h); });
 
   /* language */
   function setLang(l) {
     if (l === lang) return;
     lang = l;
-    localStorage.setItem("journey-lang", l);
-    $("#lang-en").classList.toggle("on", l === "en");
-    $("#lang-pt").classList.toggle("on", l === "pt");
-    document.documentElement.lang = l;
+    store.set("journey-lang", l);
+    syncLangButtons();
     renderAll();
     setMarker(SLIDES[index].focus);
+    const lt = $("#loader .loader-text"); if (lt) lt.textContent = t(DATA.brand.loading);
+  }
+  function syncLangButtons() {
+    ["en", "pt"].forEach(k => {
+      const b = $("#lang-" + k);
+      b.classList.toggle("on", lang === k);
+      b.setAttribute("aria-pressed", String(lang === k));
+    });
+    document.documentElement.lang = lang;
   }
 
   /* ------------------------------------------------------------- wire up */
   $("#bar-name").textContent = DATA.brand.name;
   $("#lang-en").onclick = () => setLang("en");
   $("#lang-pt").onclick = () => setLang("pt");
-  $("#lang-en").classList.toggle("on", lang === "en");
-  $("#lang-pt").classList.toggle("on", lang === "pt");
-  document.documentElement.lang = lang;
+  syncLangButtons();
 
   $("#prev-btn").innerHTML = `${ICON.prev}<span class="lbl"></span>`;
   $("#next-btn").innerHTML = `<span class="lbl"></span>${ICON.next}`;
@@ -429,13 +493,14 @@
     if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
     if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); next(); }
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); prev(); }
-    else if (e.key === "Home") go(0);
-    else if (e.key === "End") go(SLIDES.length - 1);
+    else if (e.key === "Home" && !e.target.closest(".col-text, .slide-inner")) go(0);
+    else if (e.key === "End" && !e.target.closest(".col-text, .slide-inner")) go(SLIDES.length - 1);
   });
 
   let tsx = 0, tsy = 0;
   window.addEventListener("touchstart", e => { const a = e.touches[0]; tsx = a.clientX; tsy = a.clientY; }, { passive: true });
   window.addEventListener("touchend", e => {
+    if (!document.querySelector(".lightbox").hidden) return;
     const b = e.changedTouches[0]; const dx = b.clientX - tsx, dy = b.clientY - tsy;
     if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) { dx < 0 ? next() : prev(); }
   }, { passive: true });
@@ -510,7 +575,14 @@
     }
 
     let open = false;
-    function setOpen(o) { open = o; panel.classList.toggle("gone", !o); if (o) { A.start(); buildPanel(); btn.classList.remove("hint"); } }
+    btn.setAttribute("aria-haspopup", "true");
+    btn.setAttribute("aria-controls", "sound-panel");
+    function setOpen(o) {
+      open = o; panel.classList.toggle("gone", !o);
+      btn.setAttribute("aria-expanded", String(o));
+      if (o) { A.start(); buildPanel(); btn.classList.remove("hint"); }
+    }
+    document.addEventListener("keydown", e => { if (open && e.key === "Escape") { setOpen(false); btn.focus(); } });
     btn.onclick = e => { e.stopPropagation(); setOpen(!open); };
     document.addEventListener("click", e => { if (open && !wrap.contains(e.target)) setOpen(false); });
 
@@ -527,6 +599,94 @@
 
     if (!A.isMuted()) setTimeout(() => btn.classList.add("hint"), 1200);
   })();
+
+  /* ---------------------------------------------------------- lightbox */
+  // Full-screen viewer for the active slide's photos and videos, with
+  // previous/next, keyboard (← → Esc) and swipe. Captions come from the card.
+  const lb = el("div", "lightbox");
+  lb.setAttribute("role", "dialog");
+  lb.setAttribute("aria-modal", "true");
+  lb.hidden = true;
+  lb.innerHTML =
+    '<div class="lb-stage"></div>' +
+    '<div class="lb-cap"><span class="lb-text"></span><span class="lb-count"></span></div>' +
+    `<button type="button" class="lb-btn lb-prev">${ICON.prev}</button>` +
+    `<button type="button" class="lb-btn lb-next">${ICON.next}</button>` +
+    '<button type="button" class="lb-close" aria-label="Close">&times;</button>';
+  document.getElementById("app").appendChild(lb);
+  const LB_LBL = { close: { en: "Close", pt: "Fechar" } };
+  let lbItems = [], lbAt = 0, lbReturn = null;
+
+  function lbShow(k) {
+    lbAt = (k + lbItems.length) % lbItems.length;
+    const card = lbItems[lbAt];
+    const stage = lb.querySelector(".lb-stage");
+    stage.innerHTML = "";
+    let m;
+    if (card.dataset.video) {
+      m = document.createElement("video");
+      m.src = card.dataset.src; m.controls = true; m.autoplay = true; m.loop = true; m.playsInline = true;
+    } else {
+      m = new Image(); m.src = card.dataset.src; m.alt = card.dataset.cap || "";
+    }
+    stage.appendChild(m);
+    requestAnimationFrame(() => m.classList.add("in"));
+    lb.querySelector(".lb-text").textContent = card.dataset.cap || "";
+    lb.querySelector(".lb-count").textContent = lbItems.length > 1 ? `${lbAt + 1} / ${lbItems.length}` : "";
+    lb.classList.toggle("single", lbItems.length < 2);
+  }
+  function lbOpen(card) {
+    lbItems = [...slideEls[index].querySelectorAll(".g-card[data-src]")];
+    lbReturn = card;
+    lb.hidden = false;
+    lb.querySelector(".lb-close").setAttribute("aria-label", t(LB_LBL.close));
+    lb.querySelector(".lb-prev").setAttribute("aria-label", t(DATA.ui.prev));
+    lb.querySelector(".lb-next").setAttribute("aria-label", t(DATA.ui.next));
+    lbShow(lbItems.indexOf(card));
+    requestAnimationFrame(() => lb.classList.add("open"));
+    lb.querySelector(".lb-close").focus();
+  }
+  function lbClose() {
+    lb.classList.remove("open");
+    lb.querySelector(".lb-stage").innerHTML = "";
+    setTimeout(() => { lb.hidden = true; }, 250);
+    if (lbReturn) lbReturn.focus();
+  }
+  const lbIsOpen = () => !lb.hidden;
+  deck.addEventListener("click", e => {
+    const card = e.target.closest(".g-card[data-src]");
+    if (card && card.closest(".slide.active")) lbOpen(card);
+  });
+  deck.addEventListener("keydown", e => {
+    const card = e.target.closest && e.target.closest(".g-card[data-src]");
+    if (card && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); lbOpen(card); }
+  });
+  lb.querySelector(".lb-prev").onclick = e => { e.stopPropagation(); lbShow(lbAt - 1); };
+  lb.querySelector(".lb-next").onclick = e => { e.stopPropagation(); lbShow(lbAt + 1); };
+  lb.querySelector(".lb-close").onclick = lbClose;
+  lb.addEventListener("click", e => { if (e.target === lb || e.target.classList.contains("lb-stage")) lbClose(); });
+  // capture phase: while open, arrows page through photos instead of chapters
+  window.addEventListener("keydown", e => {
+    if (!lbIsOpen()) return;
+    if (e.key === "Escape") lbClose();
+    else if (e.key === "ArrowRight") lbShow(lbAt + 1);
+    else if (e.key === "ArrowLeft") lbShow(lbAt - 1);
+    else if (e.key === "Tab") {
+      const f = [...lb.querySelectorAll("button, video")].filter(n => n.offsetParent);
+      const i = f.indexOf(document.activeElement);
+      e.preventDefault();
+      f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+      return;
+    } else return;
+    e.preventDefault(); e.stopImmediatePropagation();
+  }, true);
+  let lbx = 0;
+  lb.addEventListener("touchstart", e => { lbx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener("touchend", e => {
+    e.stopPropagation();
+    const dx = e.changedTouches[0].clientX - lbx;
+    if (Math.abs(dx) > 50) lbShow(lbAt + (dx < 0 ? 1 : -1));
+  });
 
   window.JOURNEY = { go, next, prev, setLang, globe, get index() { return index; }, get lang() { return lang; } };
 })();
