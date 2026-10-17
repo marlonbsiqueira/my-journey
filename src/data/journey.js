@@ -50,6 +50,7 @@ window.JOURNEY_DATA = {
     prev:    { en: "Previous", pt: "Anterior" },
     chapter: { en: "Chapter",  pt: "Capítulo" },
     of:      { en: "of",       pt: "de" },
+    photo:   { en: "Photo",    pt: "Foto" },
   },
 
   slides: [

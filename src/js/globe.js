@@ -463,9 +463,9 @@
       const fromVec = new THREE.Vector3(sp0 * Math.sin(this.cam.az), Math.cos(this.cam.polar), sp0 * Math.cos(this.cam.az));
       const toVec = latLngToVec3(country.coordinates[1], country.coordinates[0], 1).normalize();
       // duration follows the distance: short hops stay brisk, long journeys
-      // glide (≈1.8 s next door → 3.4 s across the ocean)
+      // glide (≈1.3 s next door → 2.5 s across the ocean)
       const angle = Math.acos(clamp(fromVec.normalize().dot(toVec), -1, 1));
-      const dur = clamp(1800 + angle * 900, 1800, 3400);
+      const dur = clamp(1300 + angle * 650, 1300, 2500);
       this._flightDur = dur;
       this._spawnFlightTrail(fromVec, toVec);
 
@@ -611,7 +611,7 @@
 
     returnToOrbit() {
       this._tween = {
-        t0: performance.now(), dur: 2200,
+        t0: performance.now(), dur: 1600,
         from: { az: this.cam.az, polar: this.cam.polar, radius: this.cam.radius },
         to: { az: this.cam.az, polar: this.idle.polar, radius: this.idle.radius },
         arc: 26,
