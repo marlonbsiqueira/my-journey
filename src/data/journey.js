@@ -4,7 +4,32 @@
  *
  *  Images → drop files in the "images/" folder next to index.html
  *  Flags  → public/flags/[code].png  (br, us, gb-eng, gb-nir, gb-sct, gb-wls,
- *                                      ie, it, fr, de, es, pt)
+ *           ie, it, fr, de, es, pt). Any other ISO code (jp, ma, ch…) works
+ *           without a file — the flag is fetched automatically.
+ *
+ *  ── ADD A NEW COUNTRY ──────────────────────────────────────────────────
+ *  Copy this block into `slides` where it belongs in the story (e.g. right
+ *  after the last Portugal slide), then edit the text, coordinates and photos.
+ *  The flag icon in the bottom bar, the country highlight on the globe and
+ *  the chapter number are all automatic.
+ *
+ *    {
+ *      id: "japan",                       // also the link: …/my-journey/#japan
+ *      layout: "story", chapter: "japan", // same value on every slide of this country
+ *      flag: "jp",                        // ISO country code
+ *      focus: { coordinates: [139.69, 35.68], dist: 235,   // [longitude, latitude]
+ *               marker: [139.69, 35.68], markerLabel: { en: "Tokyo", pt: "Tóquio" } },
+ *      media: { type: "gallery", items: [                   // 1 to 8 photos/videos
+ *        { src: "images/japan1.jpg", en: { cap: "Tokyo" },        pt: { cap: "Tóquio" } },
+ *        { src: "images/japan2.mp4", video: true, en: { cap: "Mount Fuji" }, pt: { cap: "Monte Fuji" } },
+ *      ] },
+ *      experiences: { en: ["Shibuya Crossing"], pt: ["Cruzamento de Shibuya"] },
+ *      en: { kicker: "Japan · Tokyo", title: "…", body: "…" },
+ *      pt: { kicker: "Japão · Tóquio", title: "…", body: "…" },
+ *    },
+ *
+ *  Coordinates: right-click the place in Google Maps → the first number is
+ *  latitude, the second longitude — here they go in the order [lng, lat].
  * ========================================================================== */
 
 window.JOURNEY_DATA = {
@@ -703,6 +728,8 @@ window.JOURNEY_DATA = {
           { src: "images/portugal4.jpg",              en: { cap: "Lisbon" },                     pt: { cap: "Lisboa" } },
           { src: "images/lisboa-castelo-sao-jorge.jpg", en: { cap: "Castelo de São Jorge" },  pt: { cap: "Castelo de São Jorge" } },
           { src: "images/lisboa-alfama.jpg",          en: { cap: "" }, pt: { cap: "" } },
+          { src: "images/lisboa-torre-belem.jpg",     en: { cap: "Belém Tower" },               pt: { cap: "Torre de Belém" } },
+          { src: "images/lisboa5.jpg",                en: { cap: "" },                          pt: { cap: "" } },
         ],
       },
       experiences: {

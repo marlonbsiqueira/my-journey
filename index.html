@@ -59,10 +59,7 @@
         <span class="bar-name" id="bar-name">MARLON B. SIQUEIRA</span>
       </div>
       <div class="bar-spacer"></div>
-      <div class="sound-wrap" id="sound-wrap">
-        <button type="button" id="sound-btn" class="sound-btn" title="Sound" aria-label="Sound" aria-expanded="false"></button>
-        <div class="sound-panel gone" id="sound-panel"></div>
-      </div>
+      <button type="button" id="sound-btn" class="sound-btn" title="Music" aria-label="Music"></button>
       <div class="lang" role="group" aria-label="Language">
         <button type="button" id="lang-en" class="on" aria-pressed="true" lang="en">EN</button>
         <button type="button" id="lang-pt" aria-pressed="false" lang="pt">PT</button>
@@ -99,11 +96,12 @@
     </div>
   </div>
 
+  <!-- audio first: the soundtrack starts downloading before the 3D engine -->
+  <script src="src/js/audio.js"></script>
   <!-- THREE + earcut (polygon triangulation for filled country highlights) -->
   <script src="src/js/vendor/three.min.js"></script>
   <script src="src/js/vendor/earcut.min.js"></script>
   <script src="src/js/globe.js"></script>
-  <script src="src/js/audio.js"></script>
   <script src="src/data/journey.js"></script>
   <script src="src/js/journey.js"></script>
 </body>
