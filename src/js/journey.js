@@ -635,7 +635,7 @@
     `<button type="button" class="lb-btn lb-next">${ICON.next}</button>` +
     '<button type="button" class="lb-close" aria-label="Close">&times;</button>';
   document.getElementById("app").appendChild(lb);
-  const LB_LBL = { close: { en: "Close", pt: "Fechar" } };
+  const LB_LBL = { close: { en: "Close", pt: "Fechar" }, dialog: { en: "Photo viewer", pt: "Visualizador de fotos" } };
   let lbItems = [], lbAt = 0, lbReturn = null;
 
   function lbShow(k) {
@@ -660,6 +660,7 @@
     lbItems = [...slideEls[index].querySelectorAll(".g-card[data-src]")];
     lbReturn = card;
     lb.hidden = false;
+    lb.setAttribute("aria-label", t(LB_LBL.dialog));
     lb.querySelector(".lb-close").setAttribute("aria-label", t(LB_LBL.close));
     lb.querySelector(".lb-prev").setAttribute("aria-label", t(DATA.ui.prev));
     lb.querySelector(".lb-next").setAttribute("aria-label", t(DATA.ui.next));

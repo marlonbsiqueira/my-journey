@@ -2,7 +2,7 @@
 
 A small, modular, dependency-light front end. Load order (`index.html`):
 
-1. **Three.js** (CDN, global `THREE`).
+1. **Three.js r160** (vendored ES module `src/js/vendor/three.module.min.js`, exposed as `window.THREE` by a tiny module loader in `index.html`).
 2. **`src/js/globe.js`** → `window.Globe` — the WebGL engine. Owns the scene
    (Earth shader, clouds, atmosphere, stars, optional borders) and the cinematic
    camera (spherical orbit, eased fly-to arcs, zoom, drag/wheel input). The lit
