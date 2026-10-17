@@ -462,10 +462,15 @@
       const sp0 = Math.sin(this.cam.polar);
       const fromVec = new THREE.Vector3(sp0 * Math.sin(this.cam.az), Math.cos(this.cam.polar), sp0 * Math.cos(this.cam.az));
       const toVec = latLngToVec3(country.coordinates[1], country.coordinates[0], 1).normalize();
+      // duration follows the distance: short hops stay brisk, long journeys
+      // glide (≈1.8 s next door → 3.4 s across the ocean)
+      const angle = Math.acos(clamp(fromVec.normalize().dot(toVec), -1, 1));
+      const dur = clamp(1800 + angle * 900, 1800, 3400);
+      this._flightDur = dur;
       this._spawnFlightTrail(fromVec, toVec);
 
       this._tween = {
-        t0: performance.now(), dur: 2800,
+        t0: performance.now(), dur,
         from: { az: this.cam.az, polar: this.cam.polar, radius: this.cam.radius },
         to: { az, polar: clamp(target.polar, 0.46, Math.PI - 0.46), radius: dist },
         arc: Math.max(12, dist * 0.05),
@@ -561,7 +566,7 @@
     _updateFlightTrail(now) {
       if (!this._flightGroup) return;
       const elapsed = now - this._flightTrailStart;
-      const DUR = 2800, FADE = 700;
+      const DUR = this._flightDur || 2800, FADE = 700;
       const arcPts = this._flightArcPts;
       const N = this._flightN, TAIL = this._flightTail;
       const line = this._flightGroup.children[0];
@@ -710,7 +715,7 @@
 
       // highlight fade-in (soft solid fill + bright edge)
       if (this._hlFill && this._hlFade < 1) {
-        this._hlFade = Math.min(1, this._hlFade + dt * 1.3);
+        this._hlFade = Math.min(1, this._hlFade + dt * 0.9); // soft fill-in (~1.1 s)
         this._hlFill.opacity = this._hlFade * 0.5;
         this._hlEdge.opacity = this._hlFade * 0.9;
       }
