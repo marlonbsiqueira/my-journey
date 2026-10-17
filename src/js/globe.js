@@ -25,11 +25,14 @@
   const CLOUD_R = EARTH_R * 1.013;
   const ATMO_R  = EARTH_R * 1.085;
 
-  // Texture sources — hosted locally, no external dependencies.
+  // Texture sources — hosted locally, no external dependencies. Phones and
+  // small screens get 2K day/night maps: the globe never fills enough pixels
+  // there to use 4K, and each 4K map costs ~45 MB of GPU memory.
+  const SMALL = Math.min(screen.width, screen.height) * (window.devicePixelRatio || 1) < 1400;
   const TEX = {
-    day:    "public/images/earth-blue-marble.jpg",
-    night:  "public/images/earth-night.jpg",
-    water:  "public/images/earth-water.png",
+    day:    SMALL ? "public/images/earth-blue-marble-2k.jpg" : "public/images/earth-blue-marble.jpg",
+    night:  SMALL ? "public/images/earth-night-2k.jpg" : "public/images/earth-night.jpg",
+    water:  "public/images/earth-water.jpg",
     // cloud coverage as a luminance-on-black JPEG used as alphaMap (white
     // clouds) — ~260 KB vs 4.8 MB for the old RGBA PNG
     clouds: "public/images/fair_clouds_2k.jpg",
@@ -222,8 +225,9 @@
             float water = texture2D(waterTexture, vUv).r;
             vec3 viewDir = normalize(cameraPosition - vPosW);
             vec3 refl = reflect(-normalize(sunDirection), N);
-            float glint = pow(max(dot(viewDir, refl), 0.0), 18.0) * water * dayAmt;
-            col += vec3(0.50, 0.68, 0.92) * glint * 0.9;
+            // tight, subtle highlight — a wide one reads as a bright blob over the ocean
+            float glint = pow(max(dot(viewDir, refl), 0.0), 60.0) * water * dayAmt;
+            col += vec3(0.50, 0.68, 0.92) * glint * 0.45;
 
             // thin atmospheric rim — visible only at the limb, not across the surface
             float rim = pow(1.0 - max(dot(viewDir, N), 0.0), 4.5);
@@ -333,8 +337,10 @@
     }
 
     clearHighlight() {
-      if (this.highlightFill) { this.earthGroup.remove(this.highlightFill); this.highlightFill = null; }
-      if (this.highlightObj) { this.earthGroup.remove(this.highlightObj); this.highlightObj = null; }
+      // free GPU buffers too — every chapter builds a new highlight
+      const drop = obj => { this.earthGroup.remove(obj); obj.geometry.dispose(); obj.material.dispose(); };
+      if (this.highlightFill) { drop(this.highlightFill); this.highlightFill = null; }
+      if (this.highlightObj) { drop(this.highlightObj); this.highlightObj = null; }
       this._hlFill = null; this._hlEdge = null;
     }
 

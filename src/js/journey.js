@@ -17,6 +17,14 @@
   const $ = sel => document.querySelector(sel);
   const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
   const flagUrl = (code) => `public/flags/${code}.png`;
+  // localStorage throws in some privacy modes — never let that break the app
+  const store = {
+    get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+  };
+  // ?debug shows the expected file name on media slots that have no file yet
+  const DEBUG = /[?&]debug\b/.test(location.search);
+  if (/[?&]present\b/.test(location.search)) document.documentElement.classList.add("present");
 
   const ICON = {
     prev: '<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="62,20 30,50 62,80" stroke="#5cc8ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 6px #5cc8ff)"/><polyline points="62,20 30,50 62,80" stroke="#e8f8ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -47,8 +55,10 @@
   DOT_ICON["other-races"] = DOT_ICON.marathon;
 
   /* ---------------------------------------------------------------- state */
-  let lang = localStorage.getItem("journey-lang") || "en";
-  let index = 0; // a jornada recomeça sempre do início
+  let lang = store.get("journey-lang") || "en";
+  // start at the chapter named in the URL hash (#rio), otherwise at the beginning
+  const hashIndex = () => SLIDES.findIndex(s => "#" + s.id === location.hash);
+  let index = Math.max(0, hashIndex());
 
   // honour the user's reduced-motion preference: no auto-rotate, no fly
   // animations, no whoosh/flash on slide change
@@ -59,12 +69,31 @@
   /* --------------------------------------------------- globe + borders */
   document.documentElement.style.setProperty("--accent", S.accent || "#5cc8ff");
   document.documentElement.style.setProperty("--hl", S.highlight || "#7df2a8");
-  const globe = new window.Globe({
-    canvas: $("#globe-canvas"),
-    accent: S.accent, highlightColor: S.highlight,
-    autoRotate: REDUCED ? false : S.autoRotate, rotateSpeed: S.rotateSpeed,
-    onProgress: pct => { const b = $("#loader .loader-bar > i"); if (b) b.style.width = Math.round(pct * 100) + "%"; },
-  });
+  // Without WebGL (old devices, disabled GPU) the story still works: a no-op
+  // globe stands in and a static backdrop is shown instead of the 3D Earth.
+  function stubGlobe() {
+    const handlers = {};
+    const noop = () => {};
+    const g = {
+      on: (evt, cb) => { (handlers[evt] = handlers[evt] || []).push(cb); return g; },
+      setGlobalBorders: noop, setVisitedCountries: noop, highlight: noop, clearHighlight: noop,
+      setMarker: noop, snapTo: noop, flyTo: noop, returnToOrbit: noop,
+    };
+    document.documentElement.classList.add("no-webgl");
+    setTimeout(() => (handlers.ready || []).forEach(cb => cb()), 0);
+    return g;
+  }
+  let globe;
+  try {
+    globe = new window.Globe({
+      canvas: $("#globe-canvas"),
+      accent: S.accent, highlightColor: S.highlight,
+      autoRotate: REDUCED ? false : S.autoRotate, rotateSpeed: S.rotateSpeed,
+      onProgress: pct => { const b = $("#loader .loader-bar > i"); if (b) b.style.width = Math.round(pct * 100) + "%"; },
+    });
+  } catch (e) {
+    globe = stubGlobe();
+  }
 
   let subunitIndex = {};
   function featureFor(match) {
@@ -94,8 +123,7 @@
   const markerEl = $("#marker");
   globe.on("marker", p => {
     if (!p) { markerEl.classList.remove("show"); return; }
-    markerEl.style.left = p.x + "px";
-    markerEl.style.top = p.y + "px";
+    markerEl.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
     markerEl.classList.toggle("show", !!p.front);
   });
   function setMarker(focus) {
@@ -117,7 +145,7 @@
     opts = opts || {};
     const box = el("div", "ph " + cls);
     if (opts.icon) box.appendChild(el("div", "ph-icon", ICON.video));
-    if (label) box.appendChild(el("div", "ph-tag", label));
+    if (label && DEBUG) box.appendChild(el("div", "ph-tag", label));
     const clear = () => { const tg = box.querySelector(".ph-tag"); tg && tg.remove(); const ic = box.querySelector(".ph-icon"); ic && ic.remove(); };
     if (opts.video) {
       const v = document.createElement("video");
@@ -130,7 +158,7 @@
       // belt-and-suspenders: if a browser ignores the loop attribute, restart on end
       v.addEventListener("ended", () => { try { v.currentTime = 0; v.play(); } catch (e) {} });
       v.addEventListener("loadeddata", () => { clear(); syncVideos(); });
-      v.addEventListener("error", () => v.remove());
+      v.addEventListener("error", () => mediaFailed(box), true);
       box.appendChild(v);
     } else {
       const img = new Image();
@@ -138,10 +166,29 @@
       img.alt = opts.alt || "";
       img.dataset.src = src;
       img.onload = clear;
-      img.onerror = () => img.remove();
+      img.onerror = () => mediaFailed(box);
       box.appendChild(img);
     }
     return box;
+  }
+
+  // A media file that doesn't exist yet: hide its card (with caption), and when
+  // a slide is left with no media at all, drop the media column (the text keeps
+  // its side, so the globe stays visible) — visitors never see empty boxes.
+  // ?debug keeps the slots visible with their expected file names.
+  function mediaFailed(box) {
+    if (DEBUG) { const m = box.querySelector("img, video"); if (m) m.remove(); return; }
+    const card = box.closest(".g-card, .logo-card, .m-single") || box;
+    if (card.classList.contains("logo-card")) { box.remove(); return; } // keep the company name
+    card.classList.add("gone");
+    const slide = box.closest(".slide");
+    const media = slide && slide.querySelector(".col-media");
+    if (!media) return;
+    media.querySelectorAll(".g-grid").forEach(g => {
+      if (!g.querySelector(".g-card:not(.gone)")) g.classList.add("gone");
+    });
+    const visible = media.querySelector(".g-card:not(.gone), .m-single:not(.gone), .logo-card, .stat-banner");
+    if (!visible) { media.classList.add("gone"); slide.dataset.media = "missing"; }
   }
 
   // assign real src to media on the slide i and its direct neighbours
@@ -296,10 +343,9 @@
       else if (s.flag) d.innerHTML = `<img src="${flagUrl(s.flag)}" alt="" draggable="false">`;
       else d.appendChild(el("span", "dot-plain"));
       const label = t(s).title || ("Slide " + (i + 1));
+      d.type = "button";
       d.title = label;
-      d.setAttribute("role", "tab");
       d.setAttribute("aria-label", label);
-      d.setAttribute("aria-selected", i === index ? "true" : "false");
       d.onclick = () => go(i);
       dotsWrap.appendChild(d);
     });
@@ -326,8 +372,9 @@
   function updateScrim() {
     const s = SLIDES[index];
     const scrim = $("#scrim");
-    scrim.dataset.mode = s.layout === "splash" ? "none"
-      : (s.layout === "closing" || s.layout === "thanks") ? "center"
+    const present = document.documentElement.classList.contains("present");
+    scrim.dataset.mode = (s.layout === "splash" && present) ? "none"
+      : (s.layout === "splash" || s.layout === "closing" || s.layout === "thanks") ? "center"
       : (slideEls[index].dataset.side === "left" ? "right" : "left");
   }
 
@@ -335,12 +382,16 @@
     [...dotsWrap.children].forEach((d, i) => {
       d.classList.toggle("on", i === index);
       d.classList.toggle("done", i < index);
-      d.setAttribute("aria-selected", i === index ? "true" : "false");
+      if (i === index) d.setAttribute("aria-current", "step"); else d.removeAttribute("aria-current");
     });
+    // keep the current icon in view when the row scrolls (small screens)
+    const cur = dotsWrap.children[index];
+    if (cur && dotsWrap.scrollWidth > dotsWrap.clientWidth) {
+      dotsWrap.scrollTo({ left: cur.offsetLeft - dotsWrap.clientWidth / 2 + cur.offsetWidth / 2, behavior: REDUCED ? "auto" : "smooth" });
+    }
     const countEl = $("#nav-count");
     countEl.innerHTML = `<b>${String(index + 1).padStart(2, "0")}</b> ${t(DATA.ui.of)} ${String(SLIDES.length).padStart(2, "0")}`;
-    countEl.setAttribute("aria-live", "polite");
-    countEl.setAttribute("aria-label", `${t(DATA.ui.chapter)} ${index + 1} ${t(DATA.ui.of)} ${SLIDES.length}`);
+    countEl.setAttribute("aria-label", `${index + 1} ${t(DATA.ui.of)} ${SLIDES.length}: ${t(SLIDES[index]).title || ""}`);
     const prevBtn = $("#prev-btn"), nextBtn = $("#next-btn");
     prevBtn.disabled = index === 0;
     nextBtn.disabled = index === SLIDES.length - 1;
@@ -359,18 +410,28 @@
   }
 
   let busy = false;
+  let pending = null; // last target requested while a transition was running
   function activateSlide() {
     slideEls[index].classList.add("active");
     const inner = slideEls[index].querySelector(".col-text"); if (inner) inner.scrollTop = 0;
     syncChrome(); updateScrim(); syncVideos();
     busy = false;
+    if (pending != null) { const p = pending; pending = null; go(p); }
+  }
+  // keep the URL pointing at the current chapter so it can be shared (…/#rio)
+  function setHash() {
+    try {
+      history.replaceState(null, "", index === 0 ? location.pathname + location.search : "#" + SLIDES[index].id);
+    } catch (e) {}
   }
   function go(i) {
-    if (i < 0 || i >= SLIDES.length || i === index || busy) return;
+    if (i < 0 || i >= SLIDES.length || i === index) return;
+    if (busy) { pending = i; return; }
     busy = true;
     const prevIndex = index;
     const prev = slideEls[index];
     index = i;
+    setHash();
     prev.classList.remove("active");
     hydrateMedia(index); // começa a baixar a mídia enquanto o globo voa
     if (!REDUCED) {
@@ -396,28 +457,35 @@
       setTimeout(activateSlide, 2200); // o texto entra enquanto o voo termina
     }
   }
-  function next() { go(index + 1); }
-  function prev() { go(index - 1); }
+  // while busy, step relative to the queued target so repeated presses add up
+  function next() { go((pending != null ? pending : index) + 1); }
+  function prev() { go((pending != null ? pending : index) - 1); }
+  window.addEventListener("hashchange", () => { const h = hashIndex(); if (h >= 0) go(h); });
 
   /* language */
   function setLang(l) {
     if (l === lang) return;
     lang = l;
-    localStorage.setItem("journey-lang", l);
-    $("#lang-en").classList.toggle("on", l === "en");
-    $("#lang-pt").classList.toggle("on", l === "pt");
-    document.documentElement.lang = l;
+    store.set("journey-lang", l);
+    syncLangButtons();
     renderAll();
     setMarker(SLIDES[index].focus);
+    const lt = $("#loader .loader-text"); if (lt) lt.textContent = t(DATA.brand.loading);
+  }
+  function syncLangButtons() {
+    ["en", "pt"].forEach(k => {
+      const b = $("#lang-" + k);
+      b.classList.toggle("on", lang === k);
+      b.setAttribute("aria-pressed", String(lang === k));
+    });
+    document.documentElement.lang = lang;
   }
 
   /* ------------------------------------------------------------- wire up */
   $("#bar-name").textContent = DATA.brand.name;
   $("#lang-en").onclick = () => setLang("en");
   $("#lang-pt").onclick = () => setLang("pt");
-  $("#lang-en").classList.toggle("on", lang === "en");
-  $("#lang-pt").classList.toggle("on", lang === "pt");
-  document.documentElement.lang = lang;
+  syncLangButtons();
 
   $("#prev-btn").innerHTML = `${ICON.prev}<span class="lbl"></span>`;
   $("#next-btn").innerHTML = `<span class="lbl"></span>${ICON.next}`;
@@ -429,8 +497,8 @@
     if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
     if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); next(); }
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); prev(); }
-    else if (e.key === "Home") go(0);
-    else if (e.key === "End") go(SLIDES.length - 1);
+    else if (e.key === "Home" && !e.target.closest(".col-text, .slide-inner")) go(0);
+    else if (e.key === "End" && !e.target.closest(".col-text, .slide-inner")) go(SLIDES.length - 1);
   });
 
   let tsx = 0, tsy = 0;
@@ -510,7 +578,14 @@
     }
 
     let open = false;
-    function setOpen(o) { open = o; panel.classList.toggle("gone", !o); if (o) { A.start(); buildPanel(); btn.classList.remove("hint"); } }
+    btn.setAttribute("aria-haspopup", "true");
+    btn.setAttribute("aria-controls", "sound-panel");
+    function setOpen(o) {
+      open = o; panel.classList.toggle("gone", !o);
+      btn.setAttribute("aria-expanded", String(o));
+      if (o) { A.start(); buildPanel(); btn.classList.remove("hint"); }
+    }
+    document.addEventListener("keydown", e => { if (open && e.key === "Escape") { setOpen(false); btn.focus(); } });
     btn.onclick = e => { e.stopPropagation(); setOpen(!open); };
     document.addEventListener("click", e => { if (open && !wrap.contains(e.target)) setOpen(false); });
 

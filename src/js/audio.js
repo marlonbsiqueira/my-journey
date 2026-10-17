@@ -21,7 +21,13 @@
 
   let ctx = null, master = null, ambientGain = null, padBus = null, melodyBus = null;
   let started = false;
-  let muted = localStorage.getItem(LS_MUTE) === "1";
+  // localStorage throws in some privacy modes — fall back to in-memory defaults
+  const store = {
+    get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+    remove: k => { try { localStorage.removeItem(k); } catch (e) {} },
+  };
+  let muted = store.get(LS_MUTE) === "1";
   const muteListeners = [], styleListeners = [];
 
   const TARGET_VOL = 0.10;
@@ -280,7 +286,7 @@
     const doStart = () => {
       if (started) return;
       started = true;
-      if (localStorage.getItem(LS_FILE)) { fileSrc = localStorage.getItem(LS_FILE); mode = "file"; }
+      if (store.get(LS_FILE)) { fileSrc = store.get(LS_FILE); mode = "file"; }
       buildAmbient();
       const now = ctx.currentTime;
       master.gain.cancelScheduledValues(now);
@@ -292,7 +298,7 @@
 
   function setMuted(m) {
     muted = m;
-    localStorage.setItem(LS_MUTE, m ? "1" : "0");
+    store.set(LS_MUTE, m ? "1" : "0");
     if (master && ctx) {
       const now = ctx.currentTime;
       master.gain.cancelScheduledValues(now);
@@ -322,9 +328,9 @@
   }
 
   /* ── Custom track API ─────────────────────────────────────────────────── */
-  function setCustomTrack(dataURL) { fileSrc = dataURL; try { localStorage.setItem(LS_FILE, dataURL); } catch (e) {} setStyle("custom"); }
+  function setCustomTrack(dataURL) { fileSrc = dataURL; store.set(LS_FILE, dataURL); setStyle("custom"); }
   function hasCustomTrack()        { return !!fileSrc; }
-  function clearCustomTrack()      { fileSrc = null; localStorage.removeItem(LS_FILE); stopFile(); setStyle("world"); }
+  function clearCustomTrack()      { fileSrc = null; store.remove(LS_FILE); stopFile(); setStyle("world"); }
 
   window.JourneyAudio = {
     start, whoosh, ping, setMuted, toggleMuted, isMuted, onMuteChange,

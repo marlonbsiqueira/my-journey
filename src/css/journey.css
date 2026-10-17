@@ -40,6 +40,9 @@
 /* no-media + closing/thanks → single centred column */
 .slide[data-media="0"] .slide-inner { justify-content: center; }
 .slide[data-media="0"] .col-text { width: 100%; max-width: 640px; }
+/* media files not uploaded yet → keep the text on its own side, globe in view */
+.slide[data-media="missing"] .slide-inner { justify-content: flex-start; }
+.slide[data-media="missing"][data-side="left"] .slide-inner { justify-content: flex-end; }
 .slide[data-layout="hero"] .col-text { max-width: 680px; }
 .slide[data-layout="closing"] .col-text,
 .slide[data-layout="thanks"] .col-text { max-width: 760px; text-align: center; }
@@ -161,7 +164,8 @@
    The star is centred on that point; the label floats to the right so its
    width never shifts the star off-location. */
 #marker {
-  position: absolute; z-index: 14; pointer-events: none;
+  /* positioned with transform from JS (no layout work every frame) */
+  position: absolute; left: 0; top: 0; z-index: 14; pointer-events: none; will-change: transform;
   width: 0; height: 0;
   opacity: 0; transition: opacity 0.4s var(--ease);
 }
@@ -361,9 +365,20 @@
 #scrim[data-mode="right"]  { background: linear-gradient(270deg, rgba(3,6,13,0.82) 0%, rgba(3,6,13,0.4) 34%, transparent 60%); }
 #scrim[data-mode="center"] { background: radial-gradient(120% 90% at 50% 55%, rgba(3,6,13,0.7), transparent 70%); }
 
-/* ----- splash: primeiro ecrã só com o planeta (modo apresentação) ------ */
-.slide[data-layout="splash"] .col-text { display: none; }
-.slide[data-layout="splash"] .slide-inner { pointer-events: none; }
+/* ----- splash: welcome text over the planet ---------------------------- */
+/* Visitors arriving from a link need to know what this is and how to start;
+   ?present hides the text again for a globe-only presentation opening. */
+.slide[data-layout="splash"] .slide-inner { justify-content: center; }
+.slide[data-layout="splash"] .col-text {
+  width: 100%; max-width: 640px; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.slide[data-layout="splash"] .s-kicker { justify-content: center; }
+.slide[data-layout="splash"] .s-title { font-size: clamp(40px, 6vw, 76px); }
+.slide[data-layout="splash"] .s-body { margin-left: auto; margin-right: auto; }
+.slide[data-layout="splash"] .btn-primary { align-self: center; }
+.present .slide[data-layout="splash"] .col-text { display: none; }
+.present .slide[data-layout="splash"] .slide-inner { pointer-events: none; }
 
 /* ----- top bar mobile adjustments ------------------------------------- */
 @media (max-width: 500px) {
@@ -398,7 +413,15 @@
   /* keep the focus star under the stacked slide content on small screens */
   #marker { z-index: 8; }
   .nav-btn { width: 54px; height: 54px; }
-  #dots { gap: 2px; max-width: calc(100vw - 24px); }
+  /* one scrollable row instead of wrapping onto the content (33 chapters) */
+  #dots {
+    gap: 4px; max-width: calc(100vw - 24px); flex-wrap: nowrap; justify-content: flex-start;
+    overflow-x: auto; overflow-y: visible; padding: 6px 8px 9px; scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+  }
+  #dots::-webkit-scrollbar { display: none; }
+  #dots .dot { flex: none; }
   #dots .dot { width: 17px; height: 15px; }
   #dots .dot img { width: 15px; height: 11px; border-radius: 2px; }
   #dots .dot svg { width: 12px; height: 12px; }
@@ -417,3 +440,15 @@
   .chips { gap: 6px; }
   .chip { font-size: 11px; padding: 6px 11px; }
 }
+
+/* ----- no-JS / no-WebGL fallbacks ----------------------------------------- */
+.noscript {
+  position: absolute; inset: 0; z-index: 70; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center;
+  background: radial-gradient(circle at 50% 45%, #0a1424, #03060d 75%);
+}
+.noscript h1 { font-family: var(--font-display); font-size: clamp(28px, 5vw, 48px); }
+.noscript p { color: var(--muted); max-width: 52ch; line-height: 1.6; }
+.noscript a { color: var(--accent); }
+.no-webgl #globe-canvas { display: none; }
+.no-webgl #app { background: radial-gradient(120% 90% at 60% 70%, #0d2a4a 0%, #071426 40%, var(--bg) 75%); }
