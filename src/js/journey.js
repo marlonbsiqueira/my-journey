@@ -455,14 +455,16 @@
   }
 
   /* navigation */
+  // Every click gets a token; timers and globe callbacks from an older click
+  // check it and bow out. So a new click never waits for the previous
+  // transition: the globe simply re-targets from wherever it is.
+  let navToken = 0;
   let busy = false;
-  let pending = null; // last target requested while a transition was running
   function activateSlide() {
     slideEls[index].classList.add("active");
     const inner = slideEls[index].querySelector(".col-text"); if (inner) inner.scrollTop = 0;
     syncChrome(); updateScrim(); syncVideos();
     busy = false;
-    if (pending != null) { const p = pending; pending = null; go(p); }
   }
   // keep the URL pointing at the current chapter so it can be shared (…/#rio)
   function setHash() {
@@ -471,19 +473,21 @@
     } catch (e) {}
   }
   /* "Morph"-style transition, in three beats:
-       1. the current text and photos fade out, leaving only the globe;
+       1. the current text and photos fade out while the globe sets off;
        2. the globe glides to the next place (or back to the rotating
           overview) — the country fills in, then the pin drops;
-       3. only after the globe has arrived do the new text and photos fade in.
+       3. the new text and photos rise in as soon as the globe has arrived.
      Overview → overview slides (education, the closing chapters…) simply
-     cross-fade over the turning planet. */
-  const T_OUT = 550;        // content fade-out before the globe moves
-  const T_AFTER_PIN = 650;  // pause on the pin before the content appears
-  const T_SETTLE = 250;     // pause after arriving when there is no pin
+     cross-fade over the turning planet. The counter and the bottom icons
+     update on the click itself, so the press always registers instantly. */
+  const T_OUT = 220;        // head start for the fade-out before the globe moves
+  const T_AFTER_PIN = 320;  // beat on the pin before the content appears
+  const T_SETTLE = 120;     // beat after arriving when there is no pin
+  const T_CROSSFADE = 150;  // overview → overview
   let waitFor = null;       // { evt, fn } resolved by the globe's arrive/orbit events
   function whenGlobe(evt, fn, maxMs) {
     let done = false;
-    const once = () => { if (done) return; done = true; waitFor = null; fn(); };
+    const once = () => { if (done) return; done = true; if (waitFor && waitFor.fn === once) waitFor = null; fn(); };
     waitFor = { evt, fn: once };
     setTimeout(once, maxMs); // never hang if an event is missed
   }
@@ -492,45 +496,47 @@
 
   function go(i) {
     if (i < 0 || i >= SLIDES.length || i === index) return;
-    if (busy) { pending = i; return; }
+    const tok = ++navToken;
+    const live = fn => (...a) => { if (tok === navToken) fn(...a); }; // drop stale callbacks
     busy = true;
     const prevFocus = SLIDES[index].focus;
-    slideEls[index].classList.remove("active");
+    slideEls.forEach(e => e.classList.remove("active")); // also mid-transition
     index = i;
     setHash();
+    syncChrome();        // instant feedback: counter + active icon
     hydrateMedia(index); // start loading photos while the globe moves
     const focus = SLIDES[index].focus;
+    const activate = live(activateSlide);
 
     if (REDUCED) {
       applyFocus(focus, false);
-      setTimeout(activateSlide, 150);
+      setTimeout(activate, 150);
       return;
     }
     setMarker(null);
-    setTimeout(() => {
+    setTimeout(live(() => {
       if (!focus || focus.overview) {
         setHighlight(null);
         const wasOverview = !prevFocus || prevFocus.overview;
-        if (wasOverview) { setTimeout(activateSlide, 250); return; } // just a cross-fade
+        if (wasOverview && globe.state !== "flying") { setTimeout(activate, T_CROSSFADE); return; } // just a cross-fade
         if (window.JourneyAudio) window.JourneyAudio.whoosh();
-        whenGlobe("orbit", () => setTimeout(activateSlide, T_SETTLE), 4000);
+        whenGlobe("orbit", live(() => setTimeout(activate, T_SETTLE)), 3500);
         globe.returnToOrbit();
         return;
       }
       if (window.JourneyAudio) window.JourneyAudio.whoosh();
-      whenGlobe("arrive", () => {
+      whenGlobe("arrive", live(() => {
         setHighlight(focus.match);
         setMarker(focus);
-        setTimeout(activateSlide, focus.marker ? T_AFTER_PIN : T_SETTLE);
-      }, 5000);
+        setTimeout(activate, focus.marker ? T_AFTER_PIN : T_SETTLE);
+      }), 4000);
       // same country → keep its highlight during the short hop
       if (focus.match !== highlighted) setHighlight(null);
       globe.flyTo({ coordinates: focus.coordinates, camDistance: focus.dist || 255 });
-    }, T_OUT);
+    }), T_OUT);
   }
-  // while busy, step relative to the queued target so repeated presses add up
-  function next() { go((pending != null ? pending : index) + 1); }
-  function prev() { go((pending != null ? pending : index) - 1); }
+  function next() { go(index + 1); }
+  function prev() { go(index - 1); }
   window.addEventListener("hashchange", () => { const h = hashIndex(); if (h >= 0) go(h); });
 
   /* language */
