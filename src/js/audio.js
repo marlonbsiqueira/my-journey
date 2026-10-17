@@ -1,190 +1,96 @@
 /* ============================================================================
  *  MY JOURNEY — audio.js
- *  Self-contained soundscape — Web Audio API, no external files.
  *
- *    • Ambient music  — World Journey: pentatonic flute melody over drone bass
- *    • Custom track   — user can drop their own audio file via the sound panel
- *    • Whoosh         — filtered-noise travel sweep on every slide transition
+ *    • Music   — public/audio/journey-theme.mp3 ("Sci-Fi Ambient" by Leberch,
+ *                Pixabay Content License), looping, starts with the site.
+ *    • Effects — whoosh on every slide change and a soft arrival ping,
+ *                synthesised with the Web Audio API.
+ *
+ *  The sound button toggles the MUSIC only; effects always play (they use
+ *  their own output, independent of the music).
+ *
+ *  Browsers block sound until the page is interacted with, unless sound is
+ *  allowed for the site. So start() is tried on load and again on the first
+ *  click / key / touch; in Chrome, allowing "Sound" for the site makes the
+ *  music start on its own every time (see README).
  *
  *  Public API: window.JourneyAudio = {
- *      start, whoosh, setMuted, toggleMuted, isMuted, onMuteChange,
- *      getStyles, getStyle, setStyle, onStyleChange,
- *      setCustomTrack, hasCustomTrack, clearCustomTrack }
+ *      start, whoosh, ping, setMuted, toggleMuted, isMuted, onMuteChange }
  * ========================================================================== */
 
 (function () {
   "use strict";
 
+  const TRACK    = "public/audio/journey-theme.mp3";
   const LS_MUTE  = "journey-muted";
-  const LS_STYLE = "journey-music-style";
-  const LS_FILE  = "journey-music-file";
+  const MUSIC_VOL = 0.6;      // track is loudness-normalised; effects sit above it
+  const FADE_IN   = 3000;     // ms
+  const FADE_OUT  = 700;
 
-  let ctx = null, master = null, ambientGain = null, padBus = null, melodyBus = null;
-  let started = false;
   // localStorage throws in some privacy modes — fall back to in-memory defaults
   const store = {
     get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
-    remove: k => { try { localStorage.removeItem(k); } catch (e) {} },
   };
   let muted = store.get(LS_MUTE) === "1";
-  const muteListeners = [], styleListeners = [];
+  const muteListeners = [];
 
-  const TARGET_VOL = 0.10;
-  const mf = m => 440 * Math.pow(2, (m - 69) / 12);
+  /* ── Music (plain <audio>, so it can start before any Web Audio unlock) ── */
+  const music = new Audio();
+  music.src = TRACK;
+  music.loop = true;
+  music.preload = "auto";
+  music.volume = 0;
+  let playing = false, fadeRAF = 0;
 
-  /* ── Single style: World Journey ─────────────────────────────────────── */
-  const PRESETS = [
-    {
-      id: "world",
-      name: { en: "World Journey", pt: "World Journey" },
-    },
-  ];
-  const styleId = "world";
-  let mode = "gen";
-  let fileEl = null, fileSrc = null;
-  let chordTimer = null, melTimer = null, phraseIdx = 0;
-  let activeVoices = [];
-
-  const PENTA = [60, 62, 64, 67, 69, 72, 74, 76, 79, 81, 84];
-  const MEL_GAPS = [800, 1050, 650, 950, 750, 1200, 600, 900, 1100, 700, 850, 1000];
-
-  function killActiveVoices(fade) {
-    if (!ctx) return;
-    const now = ctx.currentTime;
-    fade = fade || 0.45;
-    activeVoices.forEach(v => {
-      try {
-        v.gain.gain.cancelScheduledValues(now);
-        v.gain.gain.setValueAtTime(Math.max(v.gain.gain.value, 0.0001), now);
-        v.gain.gain.linearRampToValueAtTime(0.0001, now + fade);
-        v.oscs.forEach(o => { try { o.stop(now + fade + 0.05); } catch (e) {} });
-      } catch (e) {}
-    });
-    activeVoices = [];
+  function fadeTo(target, ms, done) {
+    cancelAnimationFrame(fadeRAF);
+    const from = music.volume, t0 = performance.now();
+    const step = now => {
+      const k = Math.min(1, (now - t0) / ms);
+      music.volume = from + (target - from) * k;
+      if (k < 1) fadeRAF = requestAnimationFrame(step); else if (done) done();
+    };
+    fadeRAF = requestAnimationFrame(step);
   }
 
-  /* ── AudioContext ─────────────────────────────────────────────────────── */
+  // Try to (re)start the music; resolves true when it is actually playing.
+  function start() {
+    unlockEffects();
+    if (muted || playing) return Promise.resolve(playing);
+    return music.play().then(() => {
+      playing = true;
+      fadeTo(MUSIC_VOL, FADE_IN);
+      return true;
+    }).catch(() => false); // blocked until the first interaction
+  }
+
+  function setMuted(m) {
+    muted = m;
+    store.set(LS_MUTE, m ? "1" : "0");
+    if (m) {
+      fadeTo(0, FADE_OUT, () => { music.pause(); playing = false; });
+    } else {
+      start();
+    }
+    muteListeners.forEach(fn => fn(muted));
+  }
+  function toggleMuted() { setMuted(!muted); }
+  function isMuted()     { return muted; }
+  function onMuteChange(fn) { muteListeners.push(fn); fn(muted); }
+
+  /* ── Effects: Web Audio context ───────────────────────────────────────── */
+  let ctx = null;
   function ensureContext() {
     if (ctx) return ctx;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
-    try { ctx = new AC({ latencyHint: "playback" }); } catch (e) { try { ctx = new AC(); } catch (e2) { return null; } }
-    master = ctx.createGain();
-    master.gain.value = muted ? 0 : TARGET_VOL;
-    master.connect(ctx.destination);
-    try {
-      const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
-      const src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); src.start(0);
-    } catch (e) {}
+    try { ctx = new AC({ latencyHint: "interactive" }); } catch (e) { try { ctx = new AC(); } catch (e2) { return null; } }
     return ctx;
   }
-
-  /* ── Reverb delay ─────────────────────────────────────────────────────── */
-  function makeSpace(output) {
-    const pre   = ctx.createGain();
-    const delay = ctx.createDelay(1.2); delay.delayTime.value = 0.48;
-    const fb    = ctx.createGain();    fb.gain.value = 0.38;
-    const tone  = ctx.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = 1800;
-    pre.connect(delay); delay.connect(tone); tone.connect(fb); fb.connect(delay);
-    tone.connect(output); pre.connect(output);
-    return pre;
+  function unlockEffects() {
+    if (ensureContext() && ctx.state === "suspended") ctx.resume().catch(() => {});
   }
-
-  /* ── Drone pad voice ──────────────────────────────────────────────────── */
-  function droneVoice(midi, time, dur, gainVal, detune) {
-    const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = mf(midi);
-    if (detune) o.detune.value = detune;
-    const g = ctx.createGain(); g.gain.value = 0.0001;
-    o.connect(g); g.connect(padBus);
-    g.gain.setValueAtTime(0.0001, time);
-    g.gain.linearRampToValueAtTime(gainVal, time + 2.5);
-    g.gain.setValueAtTime(gainVal, time + dur - 2.5);
-    g.gain.linearRampToValueAtTime(0.0001, time + dur);
-    o.start(time); o.stop(time + dur + 0.1);
-    activeVoices.push({ gain: g, oscs: [o] });
-  }
-
-  /* ── Flute note with vibrato ──────────────────────────────────────────── */
-  function fluteNote(midi, time) {
-    const freq = mf(midi);
-    const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = freq;
-
-    const vib  = ctx.createOscillator(); vib.type = "sine"; vib.frequency.value = 5.2;
-    const vibG = ctx.createGain(); vibG.gain.value = freq * 0.013;
-    vib.connect(vibG); vibG.connect(o.frequency);
-
-    const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 200;
-    const g  = ctx.createGain(); g.gain.value = 0.0001;
-    o.connect(hp); hp.connect(g); g.connect(melodyBus);
-
-    const dur = 1.3 + Math.random() * 0.6;
-    g.gain.setValueAtTime(0.0001, time);
-    g.gain.linearRampToValueAtTime(0.065, time + 0.1);
-    g.gain.setValueAtTime(0.065, time + dur - 0.35);
-    g.gain.linearRampToValueAtTime(0.0001, time + dur);
-
-    o.start(time);   o.stop(time + dur + 0.1);
-    vib.start(time); vib.stop(time + dur + 0.1);
-    activeVoices.push({ gain: g, oscs: [o, vib] });
-  }
-
-  /* ── Drone chord cycle ────────────────────────────────────────────────── */
-  const DRONES = [
-    { root: 36, upper: [43, 48, 55] },
-    { root: 33, upper: [40, 45, 52] },
-    { root: 38, upper: [45, 50, 57] },
-    { root: 31, upper: [38, 43, 50] },
-  ];
-  let droneIdx = 0;
-
-  function scheduleDrone() {
-    if (!started || mode !== "gen") return;
-    const d = DRONES[droneIdx % DRONES.length]; droneIdx++;
-    const now = ctx.currentTime + 0.05, dur = 12;
-    droneVoice(d.root,      now, dur, 0.14,  0);
-    droneVoice(d.root,      now, dur, 0.09, -4);
-    droneVoice(d.root + 12, now, dur, 0.07,  3);
-    d.upper.forEach((n, i) => droneVoice(n, now, dur, 0.045 - i * 0.008, i * 2));
-    chordTimer = setTimeout(scheduleDrone, 11500);
-  }
-
-  /* ── Pentatonic melody scheduler ─────────────────────────────────────── */
-  function scheduleMelody() {
-    if (!started || mode !== "gen") return;
-    const note = PENTA[phraseIdx % PENTA.length]; phraseIdx++;
-    if (Math.random() > 0.25) fluteNote(note, ctx.currentTime + 0.04);
-    const gap = MEL_GAPS[phraseIdx % MEL_GAPS.length];
-    melTimer = setTimeout(scheduleMelody, gap);
-  }
-
-  function restartGen() {
-    clearTimeout(chordTimer); clearTimeout(melTimer);
-    killActiveVoices(0.45);
-    droneIdx = 0; phraseIdx = Math.floor(Math.random() * PENTA.length);
-    if (mode === "gen") {
-      scheduleDrone();
-      melTimer = setTimeout(scheduleMelody, 2200);
-    }
-  }
-
-  /* ── Ambient setup ────────────────────────────────────────────────────── */
-  function buildAmbient() {
-    ambientGain = ctx.createGain(); ambientGain.gain.value = 0.85; ambientGain.connect(master);
-    const space = makeSpace(ambientGain);
-    padBus    = ctx.createGain(); padBus.gain.value    = 1.0;  padBus.connect(space);
-    melodyBus = ctx.createGain(); melodyBus.gain.value = 0.95; melodyBus.connect(space);
-    if (mode === "file" && fileSrc) startFile(); else restartGen();
-  }
-
-  /* ── Custom track ─────────────────────────────────────────────────────── */
-  function startFile() {
-    if (!fileEl) { fileEl = new Audio(); fileEl.loop = true; fileEl.crossOrigin = "anonymous"; }
-    fileEl.src = fileSrc;
-    try { if (!fileEl._node) { fileEl._node = ctx.createMediaElementSource(fileEl); fileEl._node.connect(master); } } catch (e) {}
-    fileEl.play().catch(() => {});
-  }
-  function stopFile() { if (fileEl) { try { fileEl.pause(); } catch (e) {} } }
 
   /* ── Noise buffer for whoosh ──────────────────────────────────────────── */
   function makeNoise(seconds) {
@@ -203,8 +109,7 @@
     return whooshOut;
   }
 
-  // whoosh/ping saem por um canal próprio (fora do master): o mute do painel
-  // vale só para a música — os efeitos de viagem tocam sempre (intencional)
+  // whoosh/ping use their own output, so muting the music never silences them
   function whoosh() {
     if (!ensureContext()) return;
     if (ctx.state === "suspended") { ctx.resume().then(_doWhoosh).catch(() => {}); return; }
@@ -280,61 +185,5 @@
     } catch (e) {}
   }
 
-  /* ── Lifecycle ────────────────────────────────────────────────────────── */
-  function start() {
-    if (!ensureContext()) return;
-    const doStart = () => {
-      if (started) return;
-      started = true;
-      if (store.get(LS_FILE)) { fileSrc = store.get(LS_FILE); mode = "file"; }
-      buildAmbient();
-      const now = ctx.currentTime;
-      master.gain.cancelScheduledValues(now);
-      master.gain.setValueAtTime(0.0001, now);
-      master.gain.linearRampToValueAtTime(muted ? 0 : TARGET_VOL, now + 2.5);
-    };
-    if (ctx.state === "suspended") { ctx.resume().then(doStart).catch(doStart); } else { doStart(); }
-  }
-
-  function setMuted(m) {
-    muted = m;
-    store.set(LS_MUTE, m ? "1" : "0");
-    if (master && ctx) {
-      const now = ctx.currentTime;
-      master.gain.cancelScheduledValues(now);
-      master.gain.setValueAtTime(master.gain.value, now);
-      master.gain.linearRampToValueAtTime(m ? 0 : TARGET_VOL, now + 0.4);
-    }
-    if (m) stopFile(); else if (started && mode === "file") startFile();
-    muteListeners.forEach(fn => fn(muted));
-  }
-  function toggleMuted() { setMuted(!muted); }
-  function isMuted()     { return muted; }
-  function onMuteChange(fn) { muteListeners.push(fn); fn(muted); }
-
-  /* ── Style API (kept for compatibility — only "world" exists now) ─────── */
-  function getStyles()     { return PRESETS.map(p => ({ id: p.id, name: p.name })); }
-  function getStyle()      { return mode === "file" ? "custom" : styleId; }
-  function onStyleChange(fn) { styleListeners.push(fn); fn(getStyle()); }
-  function setStyle(id) {
-    start();
-    if (muted) setMuted(false);
-    if (id === "custom") {
-      if (fileSrc) { mode = "file"; clearTimeout(chordTimer); clearTimeout(melTimer); killActiveVoices(0.45); startFile(); }
-    } else {
-      mode = "gen"; stopFile(); restartGen();
-    }
-    styleListeners.forEach(fn => fn(getStyle()));
-  }
-
-  /* ── Custom track API ─────────────────────────────────────────────────── */
-  function setCustomTrack(dataURL) { fileSrc = dataURL; store.set(LS_FILE, dataURL); setStyle("custom"); }
-  function hasCustomTrack()        { return !!fileSrc; }
-  function clearCustomTrack()      { fileSrc = null; store.remove(LS_FILE); stopFile(); setStyle("world"); }
-
-  window.JourneyAudio = {
-    start, whoosh, ping, setMuted, toggleMuted, isMuted, onMuteChange,
-    getStyles, getStyle, setStyle, onStyleChange,
-    setCustomTrack, hasCustomTrack, clearCustomTrack,
-  };
+  window.JourneyAudio = { start, whoosh, ping, setMuted, toggleMuted, isMuted, onMuteChange };
 })();

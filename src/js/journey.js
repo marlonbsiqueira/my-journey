@@ -506,6 +506,7 @@
     renderAll();
     setMarker(SLIDES[index].focus);
     const lt = $("#loader .loader-text"); if (lt) lt.textContent = t(DATA.brand.loading);
+    document.dispatchEvent(new Event("langchange"));
   }
   function syncLangButtons() {
     ["en", "pt"].forEach(k => {
@@ -558,85 +559,38 @@
   const lt = $("#loader .loader-text"); if (lt) lt.textContent = t(DATA.brand.loading);
 
   /* ------------------------------------------------------------- audio */
+  // Presentation mode: the music starts with the site. Browsers only allow
+  // that once sound is permitted for the site, so it is tried on load and
+  // again on the first click / key / touch. The top-bar button turns the
+  // MUSIC on and off; slide whoosh + arrival ping keep playing either way.
   (function setupAudio() {
     const A = window.JourneyAudio;
     if (!A) return;
     const btn = $("#sound-btn");
-    const panel = $("#sound-panel");
-    const wrap = $("#sound-wrap");
-    const ICON_ON =
+    btn.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="M4 9v6h4l5 4V5L8 9H4z"/>' +
       '<path class="wave" d="M16.5 8.5a5 5 0 0 1 0 7"/>' +
       '<path class="wave" d="M19 6a8.5 8.5 0 0 1 0 12"/>' +
       '<path class="slash" d="M3 3l18 18"/></svg>';
-    btn.innerHTML = ICON_ON;
-
-    const LBL = {
-      title: { en: "Soundtrack", pt: "Trilha sonora" },
-      own:   { en: "Use my own music…", pt: "Usar minha música…" },
-      mute:  { en: "Mute", pt: "Mudo" },
-      custom:{ en: "My music", pt: "Minha música" },
+    const LBL = { on: { en: "Music on — click to mute", pt: "Música ligada — clique para desligar" },
+                  off: { en: "Music off — click to play", pt: "Música desligada — clique para ligar" } };
+    const label = () => {
+      const l = t(A.isMuted() ? LBL.off : LBL.on);
+      btn.title = l; btn.setAttribute("aria-label", l);
+      btn.setAttribute("aria-pressed", String(!A.isMuted()));
     };
-    const EQ = '<span class="sp-eq"><i></i><i></i><i></i></span>';
-    const FILE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+    A.onMuteChange(m => { btn.classList.toggle("muted", m); label(); });
+    btn.onclick = e => { e.stopPropagation(); A.toggleMuted(); };
+    document.addEventListener("langchange", label);
 
-    function buildPanel() {
-      const styles = A.getStyles();
-      const cur = A.getStyle();
-      let html = `<div class="sp-head">${t(LBL.title)}</div>`;
-      styles.forEach(s => {
-        html += `<button class="sp-item${cur === s.id ? " on" : ""}" data-style="${s.id}">` +
-                `<span class="sp-dot"></span><span>${s.name[lang] || s.name.en}</span>${EQ}</button>`;
-      });
-      if (A.hasCustomTrack()) {
-        html += `<button class="sp-item${cur === "custom" ? " on" : ""}" data-style="custom">` +
-                `<span class="sp-dot"></span><span>${t(LBL.custom)}</span>${EQ}</button>`;
-      }
-      html += `<div class="sp-sep"></div>`;
-      html += `<button class="sp-file" id="sp-file-btn">${FILE_ICON}<span>${t(LBL.own)}</span></button>`;
-      html += `<input type="file" id="sp-file-input" accept="audio/*" style="display:none">`;
-      html += `<button class="sp-mute${A.isMuted() ? " on" : ""}" id="sp-mute">${t(LBL.mute)}</button>`;
-      panel.innerHTML = html;
-
-      panel.querySelectorAll(".sp-item").forEach(it => {
-        it.onclick = () => { A.setStyle(it.dataset.style); buildPanel(); };
-      });
-      $("#sp-file-btn").onclick = () => $("#sp-file-input").click();
-      $("#sp-file-input").onchange = e => {
-        const f = e.target.files && e.target.files[0];
-        if (!f) return;
-        const r = new FileReader();
-        r.onload = () => { A.setCustomTrack(r.result); buildPanel(); };
-        r.readAsDataURL(f);
-      };
-      $("#sp-mute").onclick = () => { A.toggleMuted(); buildPanel(); };
+    const events = ["pointerdown", "keydown", "touchstart"];
+    function kick(e) {
+      if (e && e.target && e.target.closest && e.target.closest("#sound-btn")) return; // the button handles itself
+      A.start().then(ok => { if (ok || A.isMuted()) events.forEach(ev => window.removeEventListener(ev, kick, true)); });
     }
-
-    let open = false;
-    btn.setAttribute("aria-haspopup", "true");
-    btn.setAttribute("aria-controls", "sound-panel");
-    function setOpen(o) {
-      open = o; panel.classList.toggle("gone", !o);
-      btn.setAttribute("aria-expanded", String(o));
-      if (o) { A.start(); buildPanel(); btn.classList.remove("hint"); }
-    }
-    document.addEventListener("keydown", e => { if (open && e.key === "Escape") { setOpen(false); btn.focus(); } });
-    btn.onclick = e => { e.stopPropagation(); setOpen(!open); };
-    document.addEventListener("click", e => { if (open && !wrap.contains(e.target)) setOpen(false); });
-
-    A.onMuteChange(m => { btn.classList.toggle("muted", m); });
-
-    // Start the soundscape on the first interaction anywhere (autoplay policy).
-    function kick() {
-      A.start();
-      window.removeEventListener("pointerdown", kick);
-      window.removeEventListener("keydown", kick);
-    }
-    window.addEventListener("pointerdown", kick);
-    window.addEventListener("keydown", kick);
-
-    if (!A.isMuted()) setTimeout(() => btn.classList.add("hint"), 1200);
+    events.forEach(ev => window.addEventListener(ev, kick, true));
+    A.start().then(ok => { if (ok) events.forEach(ev => window.removeEventListener(ev, kick, true)); });
   })();
 
   /* ---------------------------------------------------------- lightbox */

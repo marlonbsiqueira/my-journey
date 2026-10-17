@@ -188,3 +188,19 @@ MIT.
 
 The site also works without WebGL (static backdrop instead of the 3D globe) and
 without JavaScript (a short summary with a link to the portfolio).
+
+---
+
+## 🎵 Music (presentation mode)
+
+The soundtrack (`public/audio/journey-theme.mp3` — "Sci-Fi Ambient" by Leberch,
+[Pixabay Content License](https://pixabay.com/service/license-summary/)) starts
+with the site and loops while the globe turns. The speaker button in the top
+bar turns the **music** on/off; the travel whoosh and arrival sound always play.
+
+Browsers only play sound before any click if sound is allowed for the site.
+For a presentation in **Chrome**: open the site, click the icon left of the
+address → **Site settings** → **Sound: Allow** (once per computer). After that
+the music starts on its own. Otherwise it starts on the first click or key
+press. To change the music, replace `journey-theme.mp3` with another MP3 of the
+same name.

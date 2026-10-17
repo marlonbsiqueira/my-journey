@@ -289,58 +289,6 @@
 .sound-btn.muted .wave { opacity: 0; }
 .sound-btn .slash { opacity: 0; transition: opacity 0.25s var(--ease); }
 .sound-btn.muted .slash { opacity: 1; }
-/* gentle pulse hint so users notice they can enable sound */
-.sound-btn.hint { animation: soundHint 1.8s ease-in-out 3; }
-@keyframes soundHint { 0%,100% { box-shadow: 0 0 0 0 rgba(92,200,255,0); } 50% { box-shadow: 0 0 0 6px rgba(92,200,255,0.18); border-color: var(--accent-line); } }
-
-/* sound / music panel */
-.sound-wrap { position: relative; display: flex; }
-.sound-panel {
-  position: absolute; top: calc(100% + 10px); right: 0; z-index: 40;
-  width: 248px; padding: 14px; border-radius: var(--r);
-  background: var(--panel-strong); border: 1px solid var(--line);
-  backdrop-filter: blur(20px); box-shadow: var(--shadow);
-}
-.sound-panel .sp-head {
-  font-family: var(--font-display); font-size: 10.5px; letter-spacing: 0.22em;
-  text-transform: uppercase; color: var(--muted-2); margin-bottom: 10px;
-}
-.sp-item {
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 9px 11px; border-radius: var(--r-sm); border: 1px solid transparent;
-  background: transparent; color: var(--text); cursor: pointer; text-align: left;
-  font-family: var(--font-body); font-size: 13.5px; transition: all 0.25s var(--ease);
-}
-.sp-item:hover { background: rgba(255,255,255,0.05); }
-.sp-item.on { background: var(--accent-soft); border-color: var(--accent-line); }
-.sp-item .sp-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted-2); flex: none; transition: all 0.25s var(--ease); }
-.sp-item.on .sp-dot { background: var(--accent); box-shadow: 0 0 9px var(--accent); }
-.sp-item .sp-eq { margin-left: auto; display: flex; gap: 2px; align-items: flex-end; height: 13px; opacity: 0; transition: opacity 0.25s; }
-.sp-item.on .sp-eq { opacity: 1; }
-.sp-item .sp-eq i { width: 2.5px; background: var(--accent); border-radius: 2px; animation: eq 0.9s ease-in-out infinite; }
-.sp-item .sp-eq i:nth-child(1){ height: 5px; animation-delay: 0s; }
-.sp-item .sp-eq i:nth-child(2){ height: 11px; animation-delay: 0.2s; }
-.sp-item .sp-eq i:nth-child(3){ height: 7px; animation-delay: 0.4s; }
-@keyframes eq { 0%,100%{ transform: scaleY(0.4); } 50%{ transform: scaleY(1); } }
-.sp-sep { height: 1px; background: var(--line-soft); margin: 9px 2px; }
-.sp-file {
-  display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 11px;
-  border-radius: var(--r-sm); border: 1px dashed var(--line); background: transparent;
-  color: var(--muted); cursor: pointer; font-family: var(--font-body); font-size: 12.5px;
-  transition: all 0.25s var(--ease);
-}
-.sp-file:hover { border-color: var(--accent-line); color: var(--text); }
-.sp-file svg { width: 15px; height: 15px; flex: none; }
-.sp-mute {
-  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
-  margin-top: 9px; padding: 9px; border-radius: var(--r-sm);
-  border: 1px solid var(--line); background: transparent; color: var(--muted);
-  cursor: pointer; font-family: var(--font-display); font-size: 11px; letter-spacing: 0.14em;
-  text-transform: uppercase; transition: all 0.25s var(--ease);
-}
-.sp-mute:hover { color: var(--text); border-color: var(--accent-line); }
-.sp-mute.on { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
-
 /* ----- bottom navigation ----------------------------------------------- */
 #nav {
   position: absolute;
