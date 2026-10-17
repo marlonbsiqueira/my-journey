@@ -729,7 +729,7 @@ window.JOURNEY_DATA = {
           { src: "images/lisboa-castelo-sao-jorge.jpg", en: { cap: "Castelo de São Jorge" },  pt: { cap: "Castelo de São Jorge" } },
           { src: "images/lisboa-alfama.jpg",          en: { cap: "" }, pt: { cap: "" } },
           { src: "images/lisboa-torre-belem.jpg",     en: { cap: "Belém Tower" },               pt: { cap: "Torre de Belém" } },
-          { src: "images/lisboa-ponte-25-abril.jpg",  en: { cap: "25 de Abril Bridge" },        pt: { cap: "Ponte 25 de Abril" } },
+          { src: "images/lisboa5.jpg",                en: { cap: "" },                          pt: { cap: "" } },
         ],
       },
       experiences: {
