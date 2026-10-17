@@ -99,7 +99,10 @@
     const g = {
       on: (evt, cb) => { (handlers[evt] = handlers[evt] || []).push(cb); return g; },
       setGlobalBorders: noop, setVisitedCountries: noop, highlight: noop, clearHighlight: noop,
-      setMarker: noop, snapTo: noop, flyTo: noop, returnToOrbit: noop,
+      setMarker: noop, snapTo: noop,
+      // no camera to move: report arrival straight away so slides still advance
+      flyTo: () => setTimeout(() => (handlers.arrive || []).forEach(cb => cb()), 0),
+      returnToOrbit: () => setTimeout(() => (handlers.orbit || []).forEach(cb => cb()), 0),
     };
     document.documentElement.classList.add("no-webgl");
     setTimeout(() => (handlers.ready || []).forEach(cb => cb()), 0);
@@ -154,7 +157,10 @@
     const visitedFeatures = visited.map(m => featureFor(m)).filter(Boolean);
     if (visitedFeatures.length) globe.setVisitedCountries(visitedFeatures);
 
-    applyFocus(SLIDES[index].focus, true); // re-apply highlight once data is in
+    // border data is in: (re)draw the current country's highlight
+    highlighted = undefined;
+    const f = SLIDES[index].focus;
+    if (f && !f.overview && !busy) setHighlight(f.match);
   });
 
   /* --------------------------------------------------- focus star marker */
@@ -388,21 +394,25 @@
   }
 
   /* globe focus per slide */
+  // Country highlight: kept as-is when the next place is in the same country
+  // (Rio → Florianópolis), so it doesn't blink off and on between slides.
+  let highlighted = null;
+  function setHighlight(match) {
+    if (match === highlighted) return;
+    highlighted = match || null;
+    globe.clearHighlight();
+    const feat = match && featureFor(match);
+    if (feat) globe.highlight(feat);
+  }
+
+  // Instant version, used on first load (and with reduced motion).
   function applyFocus(focus, silent) {
     if (!focus) return;
+    if (focus.overview) { setMarker(null); setHighlight(null); globe.returnToOrbit(); return; }
+    globe.snapTo({ coordinates: focus.coordinates, camDistance: focus.dist || 255 });
+    if (silent) highlighted = undefined; // force a rebuild once border data is in
+    setHighlight(focus.match);
     setMarker(focus);
-    if (focus.overview) { globe.clearHighlight(); globe.returnToOrbit(); return; }
-    if (silent) {
-      // snap instantly — no fly animation (used on first load)
-      globe.snapTo({ coordinates: focus.coordinates, camDistance: focus.dist || 255 });
-    } else {
-      globe.flyTo({ coordinates: focus.coordinates, camDistance: focus.dist || 255 });
-    }
-    globe.clearHighlight();
-    if (focus.match) {
-      const feat = featureFor(focus.match);
-      if (feat) setTimeout(() => globe.highlight(feat), silent ? 0 : 700);
-    }
   }
 
   function updateScrim() {
@@ -437,13 +447,6 @@
   }
 
   /* navigation */
-  const flashEl = $("#flight-flash");
-  function triggerFlash() {
-    if (!flashEl) return;
-    flashEl.classList.add("fire");
-    setTimeout(() => flashEl.classList.remove("fire"), 650);
-  }
-
   let busy = false;
   let pending = null; // last target requested while a transition was running
   function activateSlide() {
@@ -459,38 +462,63 @@
       history.replaceState(null, "", index === 0 ? location.pathname + location.search : "#" + SLIDES[index].id);
     } catch (e) {}
   }
+  /* "Morph"-style transition, in three beats:
+       1. the current text and photos fade out, leaving only the globe;
+       2. the globe glides to the next place (or back to the rotating
+          overview) — the country fills in, then the pin drops;
+       3. only after the globe has arrived do the new text and photos fade in.
+     Overview → overview slides (education, the closing chapters…) simply
+     cross-fade over the turning planet. */
+  const T_OUT = 550;        // content fade-out before the globe moves
+  const T_AFTER_PIN = 650;  // pause on the pin before the content appears
+  const T_SETTLE = 250;     // pause after arriving when there is no pin
+  let waitFor = null;       // { evt, fn } resolved by the globe's arrive/orbit events
+  function whenGlobe(evt, fn, maxMs) {
+    let done = false;
+    const once = () => { if (done) return; done = true; waitFor = null; fn(); };
+    waitFor = { evt, fn: once };
+    setTimeout(once, maxMs); // never hang if an event is missed
+  }
+  globe.on("arrive", () => { if (waitFor && waitFor.evt === "arrive") waitFor.fn(); });
+  globe.on("orbit",  () => { if (waitFor && waitFor.evt === "orbit")  waitFor.fn(); });
+
   function go(i) {
     if (i < 0 || i >= SLIDES.length || i === index) return;
     if (busy) { pending = i; return; }
     busy = true;
-    const prevIndex = index;
-    const prev = slideEls[index];
+    const prevFocus = SLIDES[index].focus;
+    slideEls[index].classList.remove("active");
     index = i;
     setHash();
-    prev.classList.remove("active");
-    hydrateMedia(index); // começa a baixar a mídia enquanto o globo voa
-    if (!REDUCED) {
-      if (window.JourneyAudio) window.JourneyAudio.whoosh();
-      triggerFlash();
-    }
+    hydrateMedia(index); // start loading photos while the globe moves
     const focus = SLIDES[index].focus;
-    const prevFocus = SLIDES[prevIndex].focus;
-    const fromOverview = !prevFocus || prevFocus.overview;
+
     if (REDUCED) {
-      // sem animação de voo: snap directo e slide entra logo
-      applyFocus(focus, true);
+      applyFocus(focus, false);
       setTimeout(activateSlide, 150);
-    } else if (focus && !focus.overview && fromOverview) {
-      // vindo de overview → snap directo sem animação de voo
-      applyFocus(focus, true);
-      setTimeout(activateSlide, 500);
-    } else if (!focus || focus.overview) {
-      applyFocus(focus);
-      setTimeout(activateSlide, 400);
-    } else {
-      applyFocus(focus);
-      setTimeout(activateSlide, 2200); // o texto entra enquanto o voo termina
+      return;
     }
+    setMarker(null);
+    setTimeout(() => {
+      if (!focus || focus.overview) {
+        setHighlight(null);
+        const wasOverview = !prevFocus || prevFocus.overview;
+        if (wasOverview) { setTimeout(activateSlide, 250); return; } // just a cross-fade
+        if (window.JourneyAudio) window.JourneyAudio.whoosh();
+        whenGlobe("orbit", () => setTimeout(activateSlide, T_SETTLE), 4000);
+        globe.returnToOrbit();
+        return;
+      }
+      if (window.JourneyAudio) window.JourneyAudio.whoosh();
+      whenGlobe("arrive", () => {
+        setHighlight(focus.match);
+        setMarker(focus);
+        setTimeout(activateSlide, focus.marker ? T_AFTER_PIN : T_SETTLE);
+      }, 5000);
+      // same country → keep its highlight during the short hop
+      if (focus.match !== highlighted) setHighlight(null);
+      globe.flyTo({ coordinates: focus.coordinates, camDistance: focus.dist || 255 });
+    }, T_OUT);
   }
   // while busy, step relative to the queued target so repeated presses add up
   function next() { go((pending != null ? pending : index) + 1); }

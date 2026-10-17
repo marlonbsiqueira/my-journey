@@ -23,7 +23,7 @@
 
   const TRACK    = "public/audio/journey-theme.mp3";
   const LS_MUTE  = "journey-muted";
-  const MUSIC_VOL = 0.6;      // track is loudness-normalised; effects sit above it
+  const MUSIC_VOL = 0.28;     // background level (track is loudness-normalised)
   const FADE_IN   = 3000;     // ms
   const FADE_OUT  = 700;
 
