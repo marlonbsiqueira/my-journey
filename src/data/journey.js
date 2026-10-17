@@ -647,7 +647,31 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  23 · PORTUGAL — Norte
+     *  23 · SPAIN — Santiago de Compostela
+     * ════════════════════════════════════════════════════════════════════════ */
+    {
+      id: "santiago-de-compostela", layout: "story", chapter: "14", flag: "es", side: "right",
+      focus: { coordinates: [-8.54, 42.88], dist: 240, match: "Spain",
+               marker: [-8.54, 42.88], markerLabel: { en: "Santiago de Compostela", pt: "Santiago de Compostela" } },
+      media: {
+        type: "gallery", cols: 2,
+        items: [
+          { src: "images/santiago1.jpg", en: { cap: "Cathedral of Santiago de Compostela" }, pt: { cap: "Catedral de Santiago de Compostela" } },
+          { src: "images/santiago2.jpg", en: { cap: "Praza do Obradoiro" },                  pt: { cap: "Praça do Obradoiro" } },
+          { src: "images/santiago3.jpg", en: { cap: "Old town" },                            pt: { cap: "Centro histórico" } },
+          { src: "images/santiago4.jpg", en: { cap: "" },                                    pt: { cap: "" } },
+        ],
+      },
+      experiences: {
+        en: ["Cathedral of Santiago", "Praza do Obradoiro", "End of the Camino de Santiago", "Galicia"],
+        pt: ["Catedral de Santiago", "Praça do Obradoiro", "Fim do Caminho de Santiago", "Galiza"],
+      },
+      en: { kicker: "Spain · Santiago de Compostela", title: "Where the Camino ends", body: "The granite heart of Galicia — the cathedral at the end of the Camino de Santiago, where pilgrims from every corner of the world arrive in the Praza do Obradoiro after weeks on the road." },
+      pt: { kicker: "Espanha · Santiago de Compostela", title: "Onde o Caminho termina", body: "O coração de granito da Galiza — a catedral no fim do Caminho de Santiago, onde peregrinos de todos os cantos do mundo chegam à Praça do Obradoiro depois de semanas de estrada." },
+    },
+
+    /* ════════════════════════════════════════════════════════════════════════
+     *  24 · PORTUGAL — Norte
      * ════════════════════════════════════════════════════════════════════════ */
     {
       id: "portugal-norte", layout: "story", chapter: "15", flag: "pt", side: "right",
@@ -682,7 +706,7 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  24 · PORTUGAL — Centro
+     *  25 · PORTUGAL — Centro
      * ════════════════════════════════════════════════════════════════════════ */
     {
       id: "portugal-centro", layout: "story", chapter: "15", flag: "pt", side: "left",
@@ -716,7 +740,7 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  25 · PORTUGAL — Sul · Lisboa
+     *  26 · PORTUGAL — Sul · Lisboa
      * ════════════════════════════════════════════════════════════════════════ */
     {
       id: "portugal-sul", layout: "story", chapter: "15", flag: "pt", side: "right",
@@ -749,7 +773,7 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  24 · ACHIEVEMENTS — Marathon
+     *  25 · ACHIEVEMENTS — Marathon
      * ════════════════════════════════════════════════════════════════════════ */
     {
       id: "marathon", layout: "story", chapter: "16", side: "left",
@@ -781,7 +805,7 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  25 · ACHIEVEMENTS — Half Marathon
+     *  26 · ACHIEVEMENTS — Half Marathon
      * ════════════════════════════════════════════════════════════════════════ */
     {
       id: "half-marathon", layout: "story", chapter: "16", side: "left",
@@ -811,7 +835,7 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  26 · ACHIEVEMENTS — Other races
+     *  27 · ACHIEVEMENTS — Other races
      * ════════════════════════════════════════════════════════════════════════ */
     {
       id: "other-races", layout: "story", chapter: "16", side: "left",
@@ -875,7 +899,7 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  26 · ACHIEVEMENTS — Other sports
+     *  27 · ACHIEVEMENTS — Other sports
      * ════════════════════════════════════════════════════════════════════════ */
     {
       id: "achievements", layout: "story", chapter: "16", side: "left",
@@ -956,7 +980,7 @@ window.JOURNEY_DATA = {
     },
 
     /* ════════════════════════════════════════════════════════════════════════
-     *  28 · THANK YOU
+     *  29 · THANK YOU
      * ════════════════════════════════════════════════════════════════════════ */
     {
       id: "thanks", layout: "thanks", chapter: "",

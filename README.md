@@ -80,7 +80,7 @@ lists the main ones; `src/data/journey.js` has the complete list (~148 files):
 | Northern Ireland | `images/nireland1.jpg`, `images/nireland2.jpg` |
 | France | `images/france1.jpg`, `images/france2.jpg` |
 | Germany | `images/germany1.jpg`, `images/germany2.jpg` |
-| Spain | `images/spain1.jpg`, `images/spain2.jpg` |
+| Spain | `images/spain1.jpg`, `images/spain2.jpg`, Santiago de Compostela: `images/santiago1.jpg` … `images/santiago4.jpg` |
 | Portugal | `images/portugal1.jpg`, `images/portugal2.jpg` |
 | Achievements | `images/sports.jpg`, `images/achv1.jpg`, `images/achv2.jpg` |
 
