@@ -34,7 +34,12 @@ Open `index.html` and travel.
   Spain · Portugal · Achievements · Reflection · Thank You. Each country is its
   own destination, with its **flag**, highlighted territory and experiences.
 - **Media-ready** — every image / video slot shows your real file the moment
-  you add it; slots without a file stay hidden.
+  you add it.
+- **Photo mosaics & full-screen viewer** — each chapter's photos fill a large
+  panel as a mosaic with a featured first photo and captions on the image;
+  clicking any photo or video opens it full screen (← → / swipe to browse,
+  Esc to close). Photos fade out for the flight and rise in once the globe
+  arrives.
 - **Responsive** — adapts from widescreen presentations to mobile.
 
 ---
@@ -58,10 +63,9 @@ Then open the printed URL.
 Drop your files into **`public/images/`** — wait, the slots point at
 **`images/…`**, so create an **`images/`** folder next to `index.html` (or change
 the paths in `src/data/journey.js`). Use these exact names and they appear
-automatically. Until a file exists its slot is hidden, so visitors never see
-empty boxes — open the site with **`?debug`** (e.g. `…/my-journey/?debug#rio`)
-to see every slot with the file name it expects. The table below lists the
-main ones; `src/data/journey.js` has the complete list (~148 files):
+automatically. Open the site with **`?debug`** (e.g. `…/my-journey/?debug#rio`)
+to see every empty slot labelled with the file name it expects. The table below
+lists the main ones; `src/data/journey.js` has the complete list (~148 files):
 
 | Slot | File(s) |
 | --- | --- |
@@ -166,7 +170,6 @@ MIT.
 | URL | Effect |
 | --- | --- |
 | `…/my-journey/#paris` | opens directly on a chapter (any slide `id`) |
-| `…/my-journey/?present` | presentation mode: the opening slide shows only the globe |
 | `…/my-journey/?debug` | shows every media slot with the file name it expects |
 
 The site also works without WebGL (static backdrop instead of the 3D globe) and

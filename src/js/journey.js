@@ -24,7 +24,6 @@
   };
   // ?debug shows the expected file name on media slots that have no file yet
   const DEBUG = /[?&]debug\b/.test(location.search);
-  if (/[?&]present\b/.test(location.search)) document.documentElement.classList.add("present");
 
   const ICON = {
     prev: '<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="62,20 30,50 62,80" stroke="#5cc8ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 6px #5cc8ff)"/><polyline points="62,20 30,50 62,80" stroke="#e8f8ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -158,7 +157,7 @@
       // belt-and-suspenders: if a browser ignores the loop attribute, restart on end
       v.addEventListener("ended", () => { try { v.currentTime = 0; v.play(); } catch (e) {} });
       v.addEventListener("loadeddata", () => { clear(); syncVideos(); });
-      v.addEventListener("error", () => mediaFailed(box), true);
+      v.addEventListener("error", () => v.remove());
       box.appendChild(v);
     } else {
       const img = new Image();
@@ -166,29 +165,10 @@
       img.alt = opts.alt || "";
       img.dataset.src = src;
       img.onload = clear;
-      img.onerror = () => mediaFailed(box);
+      img.onerror = () => img.remove();
       box.appendChild(img);
     }
     return box;
-  }
-
-  // A media file that doesn't exist yet: hide its card (with caption), and when
-  // a slide is left with no media at all, drop the media column (the text keeps
-  // its side, so the globe stays visible) — visitors never see empty boxes.
-  // ?debug keeps the slots visible with their expected file names.
-  function mediaFailed(box) {
-    if (DEBUG) { const m = box.querySelector("img, video"); if (m) m.remove(); return; }
-    const card = box.closest(".g-card, .logo-card, .m-single") || box;
-    if (card.classList.contains("logo-card")) { box.remove(); return; } // keep the company name
-    card.classList.add("gone");
-    const slide = box.closest(".slide");
-    const media = slide && slide.querySelector(".col-media");
-    if (!media) return;
-    media.querySelectorAll(".g-grid").forEach(g => {
-      if (!g.querySelector(".g-card:not(.gone)")) g.classList.add("gone");
-    });
-    const visible = media.querySelector(".g-card:not(.gone), .m-single:not(.gone), .logo-card, .stat-banner");
-    if (!visible) { media.classList.add("gone"); slide.dataset.media = "missing"; }
   }
 
   // assign real src to media on the slide i and its direct neighbours
@@ -202,13 +182,28 @@
     }
   }
 
-  function galleryItem(it, square) {
+  // Gallery card: media with the caption laid over it. Clicking (or Enter /
+  // Space) opens the lightbox; --i staggers the entrance animation.
+  function galleryItem(it, i) {
     const card = el("div", "g-card");
     const cap = t(it);
-    card.appendChild(placeholder("g-media" + (square ? " sq" : ""), it.src, it.src,
-      { video: it.video, icon: it.video, controls: it.video, alt: (cap && cap.cap) || "" }));
+    card.style.setProperty("--i", i);
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.dataset.src = it.src;
+    if (it.video) card.dataset.video = "1";
+    if (cap && cap.cap) { card.dataset.cap = cap.cap; card.setAttribute("aria-label", cap.cap); }
+    card.appendChild(placeholder("g-media", it.src, it.src,
+      { video: it.video, icon: it.video, alt: (cap && cap.cap) || "" }));
     if (cap && cap.cap) card.appendChild(el("div", "g-cap", cap.cap));
     return card;
+  }
+  // grid sized by item count (layouts in journey.css: [data-count])
+  function galleryGrid(items) {
+    const grid = el("div", "g-grid");
+    grid.dataset.count = items.length;
+    items.forEach((it, i) => grid.appendChild(galleryItem(it, i)));
+    return grid;
   }
 
   function renderMedia(m) {
@@ -216,7 +211,13 @@
     switch (m.type) {
       case "image": {
         const wrap = el("div", "m-single");
-        wrap.appendChild(placeholder("single-img", m.src, m.label));
+        const card = el("div", "g-card single-card");
+        card.style.setProperty("--i", 0);
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.dataset.src = m.src;
+        card.appendChild(placeholder("single-img", m.src, m.label));
+        wrap.appendChild(card);
         return wrap;
       }
       case "logos": {
@@ -230,9 +231,8 @@
         });
         container.appendChild(wrap);
         if (m.photos && m.photos.length) {
-          const photoGrid = el("div", "g-grid career-photos");
-          photoGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
-          m.photos.forEach(it => photoGrid.appendChild(galleryItem(it)));
+          const photoGrid = galleryGrid(m.photos);
+          photoGrid.classList.add("career-photos");
           container.appendChild(photoGrid);
         }
         return container;
@@ -243,10 +243,7 @@
           wrap.appendChild(el("div", "stat-banner",
             `<span class="sb-v">${m.stat.value}</span><span class="sb-u">${m.stat.unit}</span><span class="sb-l">${t(m.stat)}</span>`));
         }
-        const grid = el("div", "g-grid");
-        grid.style.gridTemplateColumns = `repeat(${m.cols || 2}, 1fr)`;
-        m.items.forEach(it => grid.appendChild(galleryItem(it)));
-        wrap.appendChild(grid);
+        wrap.appendChild(galleryGrid(m.items));
         return wrap;
       }
       default: return null;
@@ -372,9 +369,8 @@
   function updateScrim() {
     const s = SLIDES[index];
     const scrim = $("#scrim");
-    const present = document.documentElement.classList.contains("present");
-    scrim.dataset.mode = (s.layout === "splash" && present) ? "none"
-      : (s.layout === "splash" || s.layout === "closing" || s.layout === "thanks") ? "center"
+    scrim.dataset.mode = s.layout === "splash" ? "none"
+      : (s.layout === "closing" || s.layout === "thanks") ? "center"
       : (slideEls[index].dataset.side === "left" ? "right" : "left");
   }
 
@@ -504,6 +500,7 @@
   let tsx = 0, tsy = 0;
   window.addEventListener("touchstart", e => { const a = e.touches[0]; tsx = a.clientX; tsy = a.clientY; }, { passive: true });
   window.addEventListener("touchend", e => {
+    if (!document.querySelector(".lightbox").hidden) return;
     const b = e.changedTouches[0]; const dx = b.clientX - tsx, dy = b.clientY - tsy;
     if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) { dx < 0 ? next() : prev(); }
   }, { passive: true });
@@ -602,6 +599,94 @@
 
     if (!A.isMuted()) setTimeout(() => btn.classList.add("hint"), 1200);
   })();
+
+  /* ---------------------------------------------------------- lightbox */
+  // Full-screen viewer for the active slide's photos and videos, with
+  // previous/next, keyboard (← → Esc) and swipe. Captions come from the card.
+  const lb = el("div", "lightbox");
+  lb.setAttribute("role", "dialog");
+  lb.setAttribute("aria-modal", "true");
+  lb.hidden = true;
+  lb.innerHTML =
+    '<div class="lb-stage"></div>' +
+    '<div class="lb-cap"><span class="lb-text"></span><span class="lb-count"></span></div>' +
+    `<button type="button" class="lb-btn lb-prev">${ICON.prev}</button>` +
+    `<button type="button" class="lb-btn lb-next">${ICON.next}</button>` +
+    '<button type="button" class="lb-close" aria-label="Close">&times;</button>';
+  document.getElementById("app").appendChild(lb);
+  const LB_LBL = { close: { en: "Close", pt: "Fechar" } };
+  let lbItems = [], lbAt = 0, lbReturn = null;
+
+  function lbShow(k) {
+    lbAt = (k + lbItems.length) % lbItems.length;
+    const card = lbItems[lbAt];
+    const stage = lb.querySelector(".lb-stage");
+    stage.innerHTML = "";
+    let m;
+    if (card.dataset.video) {
+      m = document.createElement("video");
+      m.src = card.dataset.src; m.controls = true; m.autoplay = true; m.loop = true; m.playsInline = true;
+    } else {
+      m = new Image(); m.src = card.dataset.src; m.alt = card.dataset.cap || "";
+    }
+    stage.appendChild(m);
+    requestAnimationFrame(() => m.classList.add("in"));
+    lb.querySelector(".lb-text").textContent = card.dataset.cap || "";
+    lb.querySelector(".lb-count").textContent = lbItems.length > 1 ? `${lbAt + 1} / ${lbItems.length}` : "";
+    lb.classList.toggle("single", lbItems.length < 2);
+  }
+  function lbOpen(card) {
+    lbItems = [...slideEls[index].querySelectorAll(".g-card[data-src]")];
+    lbReturn = card;
+    lb.hidden = false;
+    lb.querySelector(".lb-close").setAttribute("aria-label", t(LB_LBL.close));
+    lb.querySelector(".lb-prev").setAttribute("aria-label", t(DATA.ui.prev));
+    lb.querySelector(".lb-next").setAttribute("aria-label", t(DATA.ui.next));
+    lbShow(lbItems.indexOf(card));
+    requestAnimationFrame(() => lb.classList.add("open"));
+    lb.querySelector(".lb-close").focus();
+  }
+  function lbClose() {
+    lb.classList.remove("open");
+    lb.querySelector(".lb-stage").innerHTML = "";
+    setTimeout(() => { lb.hidden = true; }, 250);
+    if (lbReturn) lbReturn.focus();
+  }
+  const lbIsOpen = () => !lb.hidden;
+  deck.addEventListener("click", e => {
+    const card = e.target.closest(".g-card[data-src]");
+    if (card && card.closest(".slide.active")) lbOpen(card);
+  });
+  deck.addEventListener("keydown", e => {
+    const card = e.target.closest && e.target.closest(".g-card[data-src]");
+    if (card && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); lbOpen(card); }
+  });
+  lb.querySelector(".lb-prev").onclick = e => { e.stopPropagation(); lbShow(lbAt - 1); };
+  lb.querySelector(".lb-next").onclick = e => { e.stopPropagation(); lbShow(lbAt + 1); };
+  lb.querySelector(".lb-close").onclick = lbClose;
+  lb.addEventListener("click", e => { if (e.target === lb || e.target.classList.contains("lb-stage")) lbClose(); });
+  // capture phase: while open, arrows page through photos instead of chapters
+  window.addEventListener("keydown", e => {
+    if (!lbIsOpen()) return;
+    if (e.key === "Escape") lbClose();
+    else if (e.key === "ArrowRight") lbShow(lbAt + 1);
+    else if (e.key === "ArrowLeft") lbShow(lbAt - 1);
+    else if (e.key === "Tab") {
+      const f = [...lb.querySelectorAll("button, video")].filter(n => n.offsetParent);
+      const i = f.indexOf(document.activeElement);
+      e.preventDefault();
+      f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+      return;
+    } else return;
+    e.preventDefault(); e.stopImmediatePropagation();
+  }, true);
+  let lbx = 0;
+  lb.addEventListener("touchstart", e => { lbx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener("touchend", e => {
+    e.stopPropagation();
+    const dx = e.changedTouches[0].clientX - lbx;
+    if (Math.abs(dx) > 50) lbShow(lbAt + (dx < 0 ? 1 : -1));
+  });
 
   window.JOURNEY = { go, next, prev, setLang, globe, get index() { return index; }, get lang() { return lang; } };
 })();
