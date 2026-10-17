@@ -16,7 +16,18 @@
 
   const $ = sel => document.querySelector(sel);
   const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+  // Flags: public/flags/<code>.png if present, otherwise the open-source
+  // flag-icons SVG for that ISO code — so a new country only needs `flag: "jp"`.
   const flagUrl = (code) => `public/flags/${code}.png`;
+  const FLAG_FALLBACK = (code) => `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${code}.svg`;
+  function flagImg(code, cls) {
+    const f = new Image();
+    if (cls) f.className = cls;
+    f.alt = ""; f.draggable = false;
+    f.onerror = () => { f.onerror = null; f.src = FLAG_FALLBACK(code); };
+    f.src = flagUrl(code);
+    return f;
+  }
   // localStorage throws in some privacy modes — never let that break the app
   const store = {
     get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -52,6 +63,18 @@
   };
   DOT_ICON["half-marathon"] = DOT_ICON.marathon;
   DOT_ICON["other-races"] = DOT_ICON.marathon;
+
+  // Chapter numbers are counted, not typed: consecutive slides sharing the
+  // same `chapter` value form one chapter, numbered 01, 02… in order. Adding
+  // or moving a country never requires renumbering the others.
+  const CHAPTER_NO = [];
+  { let n = 0, prevKey = null;
+    SLIDES.forEach((s, i) => {
+      if (!s.chapter) return;
+      if (s.chapter !== prevKey) { n++; prevKey = s.chapter; }
+      CHAPTER_NO[i] = String(n).padStart(2, "0");
+    });
+  }
 
   /* ---------------------------------------------------------------- state */
   let lang = store.get("journey-lang") || "en";
@@ -94,20 +117,36 @@
     globe = stubGlobe();
   }
 
-  let subunitIndex = {};
+  // Country shapes for the highlight. `focus.match` is looked up first in the
+  // detailed visited-subunits file (England, Scotland… as separate shapes),
+  // then in the world file by name or ISO code. A slide with a flag but no
+  // `match` uses its flag code, so any new country highlights on its own.
+  SLIDES.forEach(s => {
+    if (s.focus && !s.focus.overview && !s.focus.match && s.flag) s.focus.match = s.flag;
+  });
+  const subunitIndex = {}, countryIndex = {};
+  const addPolys = (idx, k, g) => {
+    const b = idx[k] || (idx[k] = []);
+    if (g.type === "Polygon") b.push(g.coordinates);
+    else if (g.type === "MultiPolygon") g.coordinates.forEach(p => b.push(p));
+  };
   function featureFor(match) {
-    const polys = subunitIndex[match];
+    const polys = subunitIndex[match] || countryIndex[String(match).toLowerCase()];
     if (!polys || !polys.length) return null;
     return { type: "Feature", geometry: { type: "MultiPolygon", coordinates: polys } };
   }
-  fetch(NE + "ne_110m_admin_0_countries.geojson").then(r => r.json())
-    .then(gj => globe.setGlobalBorders(gj)).catch(() => {});
-  fetch(NE + "ne_visited_subunits.geojson").then(r => r.json()).then(gj => {
-    gj.features.forEach(f => {
+  const getJSON = url => fetch(url).then(r => r.json()).catch(() => null);
+  Promise.all([getJSON(NE + "ne_110m_admin_0_countries.geojson"), getJSON(NE + "ne_visited_subunits.geojson")]).then(([world, sub]) => {
+    if (world) {
+      globe.setGlobalBorders(world);
+      world.features.forEach(f => {
+        const p = f.properties || {}, g = f.geometry; if (!g) return;
+        [p.NAME, p.ADMIN, p.ISO_A2].filter(Boolean).forEach(k => addPolys(countryIndex, k.toLowerCase(), g));
+      });
+    }
+    if (sub) sub.features.forEach(f => {
       const k = f.properties && f.properties.SUBUNIT, g = f.geometry; if (!k || !g) return;
-      const b = subunitIndex[k] || (subunitIndex[k] = []);
-      if (g.type === "Polygon") b.push(g.coordinates);
-      else if (g.type === "MultiPolygon") g.coordinates.forEach(p => b.push(p));
+      addPolys(subunitIndex, k, g);
     });
 
     // Paint all visited countries with a subtle permanent fill
@@ -116,7 +155,7 @@
     if (visitedFeatures.length) globe.setVisitedCountries(visitedFeatures);
 
     applyFocus(SLIDES[index].focus, true); // re-apply highlight once data is in
-  }).catch(() => {});
+  });
 
   /* --------------------------------------------------- focus star marker */
   const markerEl = $("#marker");
@@ -263,11 +302,11 @@
     const text = el("div", "col-text");
     const L = t(s);
 
-    if (s.layout === "story" && s.chapter)
-      text.appendChild(el("div", "s-chapter anim", `${t(DATA.ui.chapter)} ${s.chapter}`));
+    if (s.layout === "story" && CHAPTER_NO[i])
+      text.appendChild(el("div", "s-chapter anim", `${t(DATA.ui.chapter)} ${CHAPTER_NO[i]}`));
 
     const kick = el("div", "s-kicker anim");
-    if (s.flag) { const f = document.createElement("img"); f.className = "s-flag"; f.src = flagUrl(s.flag); f.alt = ""; kick.appendChild(f); }
+    if (s.flag) kick.appendChild(flagImg(s.flag, "s-flag"));
     kick.appendChild(el("span", null, L.kicker || ""));
     text.appendChild(kick);
 
@@ -337,7 +376,7 @@
       const d = el("button", "dot");
       // themed icon > country flag > plain dot
       if (DOT_ICON[s.id]) d.innerHTML = DOT_ICON[s.id];
-      else if (s.flag) d.innerHTML = `<img src="${flagUrl(s.flag)}" alt="" draggable="false">`;
+      else if (s.flag) d.appendChild(flagImg(s.flag));
       else d.appendChild(el("span", "dot-plain"));
       const label = t(s).title || ("Slide " + (i + 1));
       d.type = "button";

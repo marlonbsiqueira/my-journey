@@ -31,7 +31,7 @@
 
 /* columns — the media panel gets the larger share and a fixed height that
    always fits between the top bar and the bottom navigation */
-:root { --media-h: min(calc(100vh - 236px), 700px); }
+:root { --media-h: min(calc(100vh - 256px), 700px); }
 .col-text {
   width: min(36%, 440px); flex: none;
   max-height: calc(100vh - 210px); overflow-y: auto; padding-right: 4px;
@@ -390,7 +390,16 @@
 /* progress icons: temáticos (play/pessoa/chapéu/mala/…) + bandeiras.
    Futuros: acinzentados e apagados · visitados: coloridos · atual: maior,
    com brilho e um ponto indicador por baixo. */
-#dots { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 100%; }
+/* always one row: with more countries it scrolls (edges fade) instead of
+   wrapping into the content; the current icon is kept in view by JS */
+#dots {
+  display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; justify-content: safe center;
+  max-width: 100%; overflow-x: auto; padding: 6px 14px 9px; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+}
+#dots::-webkit-scrollbar { display: none; }
+#dots .dot { flex: none; }
 .dot {
   position: relative; display: inline-flex; align-items: center; justify-content: center;
   width: 23px; height: 20px; padding: 0; border: none; background: transparent; cursor: pointer;
@@ -473,15 +482,7 @@
             mask-image: linear-gradient(180deg, #000 calc(100% - 150px), transparent calc(100% - 104px));
   }
   .nav-btn { width: 54px; height: 54px; }
-  /* one scrollable row instead of wrapping onto the content (33 chapters) */
-  #dots {
-    gap: 4px; max-width: calc(100vw - 24px); flex-wrap: nowrap; justify-content: flex-start;
-    overflow-x: auto; overflow-y: visible; padding: 6px 8px 9px; scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
-            mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
-  }
-  #dots::-webkit-scrollbar { display: none; }
-  #dots .dot { flex: none; }
+  #dots { gap: 4px; max-width: calc(100vw - 24px); padding: 6px 8px 9px; }
   #dots .dot { width: 17px; height: 15px; }
   #dots .dot img { width: 15px; height: 11px; border-radius: 2px; }
   #dots .dot svg { width: 12px; height: 12px; }

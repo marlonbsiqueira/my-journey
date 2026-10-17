@@ -99,6 +99,20 @@ LinkedIn placeholders are there now).
 
 ---
 
+## 🌍 Add a new country
+
+1. Open `src/data/journey.js` — the header comment has a **ready-to-copy
+   block**. Paste it into `slides` where it fits in the story.
+2. Fill in `id`, `chapter` (any word, the same on every slide of that
+   country), `flag` (ISO code: `jp`, `ma`, `ch`…), the coordinates, text and
+   photos.
+3. Put the photos in `images/` with the names you used.
+
+Everything else is automatic: the flag in the bottom bar and on the slide
+(fetched by ISO code if `public/flags/<code>.png` doesn't exist), the
+country highlight on the globe (found by flag code or `focus.match` name),
+and the chapter numbers of all following slides.
+
 ## ✏️ Edit the story
 
 Everything lives in **[`src/data/journey.js`](src/data/journey.js)** — text (in
