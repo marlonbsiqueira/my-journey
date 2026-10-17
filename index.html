@@ -39,6 +39,8 @@
   <link rel="stylesheet" href="src/css/styles.css">
   <link rel="stylesheet" href="src/css/globe.css">
   <link rel="stylesheet" href="src/css/journey.css">
+  <link rel="modulepreload" href="src/js/vendor/three.module.min.js">
+  <noscript><style>#loader { display: none; }</style></noscript>
 </head>
 <body>
   <div id="app">
@@ -71,7 +73,7 @@
 
     <!-- Bottom navigation -->
     <nav id="nav" aria-label="Slide navigation">
-      <div id="dots" role="tablist" aria-label="Slides"></div>
+      <div id="dots" role="group" aria-label="Slides"></div>
       <div class="nav-row">
         <button type="button" class="nav-btn" id="prev-btn" aria-label="Previous"></button>
         <span id="nav-count" aria-live="polite"></span>
@@ -85,7 +87,6 @@
         <p>This interactive journey needs JavaScript. From Belo Horizonte to the world — Brazil, the United States, the UK, Ireland, Italy, France, Germany, Spain and Portugal.</p>
         <p><a href="https://marlonbsiqueira.github.io/marlonbsiqueira/">Visit my portfolio</a></p>
       </div>
-      <style>#loader { display: none; }</style>
     </noscript>
 
     <!-- Loading -->
@@ -98,11 +99,17 @@
 
   <!-- audio first: the soundtrack starts downloading before the 3D engine -->
   <script src="src/js/audio.js"></script>
-  <!-- THREE + earcut (polygon triangulation for filled country highlights) -->
-  <script src="src/js/vendor/three.min.js"></script>
+  <!-- earcut (polygon triangulation for filled country highlights) + content -->
   <script src="src/js/vendor/earcut.min.js"></script>
-  <script src="src/js/globe.js"></script>
   <script src="src/data/journey.js"></script>
-  <script src="src/js/journey.js"></script>
+  <!-- THREE as an ES module (the classic build is deprecated since r150).
+       Module scripts run in document order after parsing, so globe.js and
+       journey.js below always see window.THREE. -->
+  <script type="module">
+    import * as THREE from "./src/js/vendor/three.module.min.js";
+    window.THREE = THREE;
+  </script>
+  <script type="module" src="src/js/globe.js"></script>
+  <script type="module" src="src/js/journey.js"></script>
 </body>
 </html>

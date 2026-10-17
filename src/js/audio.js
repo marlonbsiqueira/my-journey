@@ -47,8 +47,10 @@
     cancelAnimationFrame(fadeRAF);
     const from = music.volume, t0 = performance.now();
     const step = now => {
-      const k = Math.min(1, (now - t0) / ms);
-      music.volume = from + (target - from) * k;
+      // a rAF timestamp can precede t0 (it marks the frame start), so clamp
+      // both ends: a volume outside [0, 1] throws and would stall the fade
+      const k = Math.max(0, Math.min(1, (now - t0) / ms));
+      music.volume = Math.max(0, Math.min(1, from + (target - from) * k));
       if (k < 1) fadeRAF = requestAnimationFrame(step); else if (done) done();
     };
     fadeRAF = requestAnimationFrame(step);

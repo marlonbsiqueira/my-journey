@@ -14,7 +14,7 @@
  *  Public API (see bottom): new Globe(opts) → { flyTo, returnToOrbit,
  *    setGlobalBorders, highlight, clearHighlight, addMarkers, on, dispose }.
  *
- *  Depends on global THREE (loaded before this file).
+ *  Depends on window.THREE, set by the module loader in index.html.
  * ========================================================================== */
 
 (function () {
