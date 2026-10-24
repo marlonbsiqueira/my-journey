@@ -158,6 +158,9 @@ The whole folder is static — deploy it anywhere.
 | First / last chapter | `Home` / `End` |
 | Switch language | EN / PT toggle (top right) |
 | Rotate / zoom the globe | Drag / scroll |
+| Full screen on / off | `F` |
+| Black screen (pause while you talk) | `B` or `.` — again, `Esc` or a click to return |
+| Mouse cursor | Hides by itself after 2.5 s without moving |
 
 ---
 
