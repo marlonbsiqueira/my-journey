@@ -332,6 +332,13 @@
       cta.onclick = () => go(i + 1);
       text.appendChild(cta);
     }
+    if (s.qr) {
+      const q = el("figure", "qr anim");
+      const im = new Image(); im.src = s.qr.src; im.alt = ""; im.width = 160; im.height = 160;
+      q.appendChild(im);
+      q.appendChild(el("figcaption", null, `<span>${s.qr[lang] || s.qr.en}</span><span class="qr-url">${s.qr.url}</span>`));
+      text.appendChild(q);
+    }
     if (s.contact) {
       const c = el("div", "contacts anim");
       s.contact.forEach(ct => {
@@ -578,6 +585,34 @@
     else if (e.key === "Home" && !e.target.closest(".col-text, .slide-inner")) go(0);
     else if (e.key === "End" && !e.target.closest(".col-text, .slide-inner")) go(SLIDES.length - 1);
   });
+
+  /* presenter helpers: F = full screen, B or . = black screen, idle cursor hides */
+  const blackout = el("div", "blackout");
+  blackout.hidden = true;
+  document.body.appendChild(blackout);
+  const setBlack = on => { blackout.hidden = !on; };
+  blackout.addEventListener("click", () => setBlack(false));
+  window.addEventListener("keydown", e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || !document.querySelector(".lightbox").hidden) return;
+    const tag = e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+    const k = e.key.toLowerCase();
+    if (k === "f") {
+      e.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen?.().catch(() => {});
+    } else if (k === "b" || k === ".") { e.preventDefault(); setBlack(blackout.hidden); }
+    else if (k === "escape" && !blackout.hidden) setBlack(false);
+  });
+  let idle;
+  const wake = () => {
+    document.body.classList.remove("cursor-idle");
+    clearTimeout(idle);
+    idle = setTimeout(() => document.body.classList.add("cursor-idle"), 2500);
+  };
+  window.addEventListener("mousemove", wake, { passive: true });
+  window.addEventListener("mousedown", wake, { passive: true });
+  wake();
 
   let tsx = 0, tsy = 0;
   window.addEventListener("touchstart", e => { const a = e.touches[0]; tsx = a.clientX; tsy = a.clientY; }, { passive: true });

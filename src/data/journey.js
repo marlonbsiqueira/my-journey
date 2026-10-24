@@ -986,6 +986,8 @@ window.JOURNEY_DATA = {
     {
       id: "thanks", layout: "thanks", chapter: "",
       focus: { overview: true },
+      qr: { src: "public/assets/qr-portfolio.svg", url: "marlonbsiqueira.github.io/marlonbsiqueira",
+            en: "Scan to visit my portfolio", pt: "Leia para visitar o meu portfólio" },
       en: {
         kicker: "See you at the next destination",
         title: "Thank you",
